@@ -11,12 +11,12 @@
 <title>Gainz — Workout Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
 <style>
   :root {
     --bg:       #0d0d1a;
     --bg2:      #13131f;
-    --bg3:      #1a1a2e;
     --card:     #1e1e30;
     --border:   #2a2a40;
     --red:      #ff3c5f;
@@ -32,109 +32,54 @@
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    height: 100%;
-    background: var(--bg); color: var(--text);
+    height: 100%; background: var(--bg); color: var(--text);
     font-family: 'DM Sans', sans-serif; font-size: 15px;
     overflow: hidden;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
+    -webkit-tap-highlight-color: transparent; user-select: none;
   }
 
-  /* ── Loading splash ─────────────────────────────────── */
   #loading {
-    position: fixed; inset: 0;
-    background: var(--bg);
+    position: fixed; inset: 0; background: var(--bg);
     display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    z-index: 9999;
+    align-items: center; justify-content: center; z-index: 9999;
   }
-  #loading .splash-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 56px; letter-spacing: 5px;
-  }
+  #loading .splash-logo { font-family: 'Bebas Neue', sans-serif; font-size: 56px; letter-spacing: 5px; }
   #loading .splash-logo span { color: var(--red); }
   #loading .spinner {
     width: 32px; height: 32px;
-    border: 3px solid var(--border);
-    border-top-color: var(--red);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-top: 24px;
+    border: 3px solid var(--border); border-top-color: var(--red);
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-top: 24px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Auth screen ────────────────────────────────────── */
   #auth-screen {
-    position: fixed; inset: 0;
-    background: var(--bg);
+    position: fixed; inset: 0; background: var(--bg);
     display: none; flex-direction: column;
     align-items: center; justify-content: center;
     padding: 20px; z-index: 100;
   }
   #auth-screen.visible { display: flex; }
-  .auth-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 64px; letter-spacing: 6px;
-    margin-bottom: 4px;
-  }
+  .auth-logo { font-family: 'Bebas Neue', sans-serif; font-size: 64px; letter-spacing: 6px; margin-bottom: 4px; }
   .auth-logo span { color: var(--red); }
-  .auth-tagline {
-    color: var(--muted); font-size: 12px;
-    letter-spacing: 3px; text-transform: uppercase;
-    margin-bottom: 48px;
-  }
-  .auth-card {
-    width: 100%; max-width: 360px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-  }
-  .auth-tabs { display: flex; gap: 4px; background: var(--bg2);
-    border-radius: var(--radius-sm); padding: 4px; margin-bottom: 20px; }
-  .auth-tab {
-    flex: 1; padding: 10px; text-align: center;
-    background: none; border: none; cursor: pointer;
-    color: var(--muted); font-weight: 600; font-size: 13px;
-    border-radius: 8px; font-family: inherit;
-    text-transform: uppercase; letter-spacing: 1px;
-    transition: all 0.2s;
-  }
+  .auth-tagline { color: var(--muted); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 48px; }
+  .auth-card { width: 100%; max-width: 360px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .auth-tabs { display: flex; gap: 4px; background: var(--bg2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 20px; }
+  .auth-tab { flex: 1; padding: 10px; text-align: center; background: none; border: none; cursor: pointer;
+    color: var(--muted); font-weight: 600; font-size: 13px; border-radius: 8px; font-family: inherit;
+    text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s; }
   .auth-tab.active { background: var(--card); color: var(--text); }
-  .auth-input {
-    width: 100%;
-    background: var(--input-bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    padding: 14px 16px;
-    font-size: 15px;
-    font-family: inherit;
-    margin-bottom: 12px;
-    outline: none;
-    user-select: text;
-    transition: border-color 0.2s;
-  }
+  .auth-input { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); padding: 14px 16px; font-size: 15px; font-family: inherit; margin-bottom: 12px;
+    outline: none; user-select: text; transition: border-color 0.2s; }
   .auth-input:focus { border-color: var(--red); }
-  .auth-btn {
-    width: 100%;
-    background: var(--red);
-    color: white; border: none;
-    border-radius: var(--radius-sm);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px; letter-spacing: 2px;
-    padding: 14px; cursor: pointer;
-    margin-top: 8px;
-    transition: background 0.2s, transform 0.15s;
-  }
+  .auth-btn { width: 100%; background: var(--red); color: white; border: none;
+    border-radius: var(--radius-sm); font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px; padding: 14px; cursor: pointer; margin-top: 8px;
+    transition: background 0.2s, transform 0.15s; }
   .auth-btn:active { background: var(--red-dim); transform: scale(0.98); }
   .auth-btn:disabled { background: var(--border); color: var(--muted); }
-  .auth-error {
-    color: var(--red); font-size: 13px; margin-top: 12px;
-    text-align: center; min-height: 18px;
-  }
+  .auth-error { color: var(--red); font-size: 13px; margin-top: 12px; text-align: center; min-height: 18px; }
 
-  /* ── App shell ──────────────────────────────────────── */
   #app { display: none; flex-direction: column; height: 100dvh; }
   #app.visible { display: flex; }
 
@@ -145,192 +90,119 @@
     border-bottom: 1px solid var(--border);
     display: flex; align-items: flex-end; justify-content: space-between;
   }
-  .app-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px; letter-spacing: 3px;
-    color: var(--text); line-height: 1;
-  }
+  .app-logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; color: var(--text); line-height: 1; }
   .app-logo span { color: var(--red); }
-  .app-user {
-    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
-  }
-  .app-user-info {
-    font-size: 11px; color: var(--muted);
-    font-family: 'DM Mono', monospace; line-height: 1.4;
-    text-align: right;
-  }
+  .app-user { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .app-user-info { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; line-height: 1.4; text-align: right; }
   .app-user-info strong { color: var(--text); font-weight: 500; display: block; font-size: 12px; }
-  .signout-btn {
-    background: none; border: 1px solid var(--border);
-    color: var(--muted); font-size: 10px; font-family: inherit;
-    padding: 4px 10px; border-radius: 999px; cursor: pointer;
-    margin-top: 6px; letter-spacing: 0.5px; text-transform: uppercase;
-  }
-  .signout-btn:active { background: var(--card); }
+  .header-actions { display: flex; gap: 6px; margin-top: 6px; }
+  .icon-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 10px; font-family: inherit;
+    padding: 5px 10px; border-radius: 999px; cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 4px; }
+  .icon-btn:active { background: var(--card); }
+  .icon-btn svg { width: 12px; height: 12px; }
 
   .sync-indicator {
     position: fixed; top: 60px; right: 20px;
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--muted); font-size: 10px;
-    padding: 4px 10px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    font-size: 10px; padding: 4px 10px; border-radius: 999px;
     display: flex; align-items: center; gap: 6px;
     opacity: 0; transition: opacity 0.3s;
     z-index: 50; pointer-events: none;
     text-transform: uppercase; letter-spacing: 0.5px;
   }
   .sync-indicator.show { opacity: 1; }
-  .sync-indicator .dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--green); animation: pulse 1.5s infinite;
-  }
+  .sync-indicator .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-  /* ── Bottom nav ──────────────────────────────────────── */
   nav {
     flex-shrink: 0;
-    display: grid; grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(4, 1fr);
     background: var(--bg2); border-top: 1px solid var(--border);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  nav button {
-    background: none; border: none; cursor: pointer;
+  nav button { background: none; border: none; cursor: pointer;
     padding: 12px 4px 10px;
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     color: var(--muted); font-family: inherit;
     font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
-    transition: color 0.2s; text-transform: uppercase;
-  }
+    transition: color 0.2s; text-transform: uppercase; }
   nav button.active { color: var(--red); }
   nav button svg { width: 22px; height: 22px; }
 
-  /* ── Pages ───────────────────────────────────────────── */
   #pages { flex: 1; overflow: hidden; position: relative; }
-  .page {
-    position: absolute; inset: 0;
-    overflow-y: auto; overscroll-behavior: contain;
-    padding: 20px;
-    opacity: 0; pointer-events: none;
-    transform: translateY(12px);
-    transition: opacity 0.25s, transform 0.25s;
-  }
+  .page { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px;
+    opacity: 0; pointer-events: none; transform: translateY(12px);
+    transition: opacity 0.25s, transform 0.25s; }
   .page.active { opacity: 1; pointer-events: all; transform: none; }
 
-  .section-title {
-    font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
-  }
+  .section-title { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
 
-  .zones-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-    margin-bottom: 28px;
-  }
-  .zone-card {
-    background: var(--card); border: 2px solid var(--border);
-    border-radius: var(--radius); padding: 18px 14px;
+  .zones-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 28px; }
+  .zone-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 18px 14px;
     cursor: pointer; display: flex; flex-direction: column; gap: 8px;
     transition: border-color 0.2s, background 0.2s, transform 0.15s;
-    position: relative; overflow: hidden;
-  }
+    position: relative; overflow: hidden; }
   .zone-card:active { transform: scale(0.97); }
-  .zone-card.selected {
-    border-color: var(--red);
-    background: linear-gradient(135deg, #2a1020 0%, #1e1e30 100%);
-  }
+  .zone-card.selected { border-color: var(--red); background: linear-gradient(135deg, #2a1020 0%, #1e1e30 100%); }
   .zone-card .zone-icon { font-size: 28px; line-height: 1; }
-  .zone-card .zone-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px; letter-spacing: 1px; line-height: 1; color: var(--text);
-  }
+  .zone-card .zone-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; line-height: 1; color: var(--text); }
   .zone-card .zone-count { font-size: 11px; color: var(--muted); font-weight: 500; }
   .zone-card.selected .zone-count { color: var(--red); }
-  .zone-card .zone-dot {
-    position: absolute; top: 12px; right: 12px;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--red); opacity: 0; transition: opacity 0.2s;
-  }
+  .zone-card .zone-dot { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--red); opacity: 0; transition: opacity 0.2s; }
   .zone-card.selected .zone-dot { opacity: 1; }
 
   .exercises-section { display: none; }
   .exercises-section.visible { display: block; }
-  .exercise-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-    margin-bottom: 10px;
-    display: grid; grid-template-columns: 1fr auto;
-    gap: 10px; align-items: center;
-  }
+  .exercise-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
+    margin-bottom: 10px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
   .ex-name { font-weight: 600; font-size: 15px; text-transform: capitalize; margin-bottom: 4px; }
-  .ex-last {
-    font-size: 12px; color: var(--green);
-    font-family: 'DM Mono', monospace;
-    display: flex; align-items: center; gap: 5px;
-  }
+  .ex-last { font-size: 12px; color: var(--green); font-family: 'DM Mono', monospace; display: flex; align-items: center; gap: 5px; }
   .ex-last::before { content: '↑'; font-size: 10px; opacity: 0.7; }
   .ex-last.empty { color: var(--muted); }
   .ex-last.empty::before { content: '—'; }
-  .ex-input {
-    width: 130px; background: var(--input-bg);
-    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-    color: var(--text); font-family: 'DM Mono', monospace;
-    font-size: 14px; padding: 10px 12px; text-align: center;
-    outline: none; transition: border-color 0.2s; user-select: text;
-  }
+  .ex-input { width: 130px; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; padding: 10px 12px;
+    text-align: center; outline: none; transition: border-color 0.2s; user-select: text; }
   .ex-input:focus { border-color: var(--red); }
   .ex-input::placeholder { color: var(--muted); font-size: 11px; }
 
-  .log-btn {
-    width: 100%; background: var(--red); color: white; border: none;
-    border-radius: var(--radius);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px; letter-spacing: 2px;
+  .log-btn { width: 100%; background: var(--red); color: white; border: none; border-radius: var(--radius);
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px;
     padding: 18px; cursor: pointer; margin-top: 20px;
     transition: background 0.2s, transform 0.15s;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-  }
+    display: flex; align-items: center; justify-content: center; gap: 10px; }
   .log-btn:active { background: var(--red-dim); transform: scale(0.98); }
   .log-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
 
   #toast {
     position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--green); color: #0a1f14;
-    font-weight: 600; font-size: 14px;
-    padding: 12px 24px; border-radius: 999px;
-    opacity: 0; transition: all 0.3s;
+    background: var(--green); color: #0a1f14; font-weight: 600; font-size: 14px;
+    padding: 12px 24px; border-radius: 999px; opacity: 0; transition: all 0.3s;
     z-index: 999; white-space: nowrap; pointer-events: none;
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  .history-filters {
+  .history-filters, .progress-zone-filter {
     display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto;
     padding-bottom: 4px; -webkit-overflow-scrolling: touch;
   }
-  .filter-chip {
-    flex-shrink: 0; background: var(--card);
-    border: 1.5px solid var(--border); border-radius: 999px;
-    padding: 6px 14px; font-size: 12px; font-weight: 500;
-    color: var(--muted); cursor: pointer; transition: all 0.2s;
-  }
+  .filter-chip { flex-shrink: 0; background: var(--card); border: 1.5px solid var(--border); border-radius: 999px;
+    padding: 6px 14px; font-size: 12px; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.2s; }
   .filter-chip.active { border-color: var(--red); color: var(--red); background: #2a1020; }
 
-  .history-entry {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); padding: 13px 15px;
-    margin-bottom: 8px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
+  .history-entry { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 13px 15px; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center; }
   .he-left .he-ex { font-weight: 600; font-size: 14px; text-transform: capitalize; }
-  .he-left .he-zone {
-    font-size: 11px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
-  }
+  .he-left .he-zone { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
   .he-right { text-align: right; }
   .he-value { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--gold); }
   .he-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-  .history-day-label {
-    font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--muted); margin: 18px 0 8px;
-  }
+  .history-day-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); margin: 18px 0 8px; }
   .history-day-label:first-child { margin-top: 0; }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
@@ -338,25 +210,89 @@
   .empty-state p { font-size: 14px; line-height: 1.6; }
 
   .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
-  .stat-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-  }
-  .stat-value {
-    font-family: 'Bebas Neue', sans-serif; font-size: 36px;
-    color: var(--red); line-height: 1;
-  }
-  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px;
-    text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
   .pb-section { margin-top: 8px; }
-  .pb-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 13px 0; border-bottom: 1px solid var(--border);
-  }
+  .pb-row { display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 0; border-bottom: 1px solid var(--border); }
   .pb-row:last-child { border-bottom: none; }
   .pb-ex { font-size: 13px; text-transform: capitalize; }
   .pb-val { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--gold); }
+
+  /* ── Progress page ───────────────────────────────────── */
+  .progress-exercise-list { display: flex; flex-direction: column; gap: 8px; }
+  .progress-exercise-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px;
+    cursor: pointer; transition: border-color 0.2s, transform 0.15s;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px;
+  }
+  .progress-exercise-card:active { transform: scale(0.98); }
+  .pec-name { font-weight: 600; font-size: 14px; text-transform: capitalize; }
+  .pec-meta { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pec-trend { font-family: 'DM Mono', monospace; font-size: 12px;
+    color: var(--green); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .pec-trend.flat { color: var(--muted); }
+  .pec-trend.down { color: var(--red); }
+
+  .chart-card { background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
+  .chart-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px;
+    margin-bottom: 4px; text-transform: capitalize; }
+  .chart-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .chart-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+  .cs-item { text-align: center; }
+  .cs-value { font-family: 'DM Mono', monospace; font-size: 18px; color: var(--gold); font-weight: 500; }
+  .cs-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  #progress-chart-wrap { position: relative; height: 220px; width: 100%; }
+
+  .back-btn { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer;
+    font-family: inherit; padding: 0; margin-bottom: 16px;
+    display: inline-flex; align-items: center; gap: 6px; }
+  .back-btn:active { color: var(--red); }
+
+  /* ── Settings modal ──────────────────────────────────── */
+  #settings-modal { position: fixed; inset: 0; background: var(--bg);
+    z-index: 200; display: none; flex-direction: column; }
+  #settings-modal.visible { display: flex; }
+  .settings-header { flex-shrink: 0; padding: 56px 20px 16px;
+    background: linear-gradient(180deg, #0a0a14 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-end; justify-content: space-between; }
+  .settings-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
+  .close-btn { background: var(--card); border: 1px solid var(--border); color: var(--text);
+    font-size: 18px; width: 36px; height: 36px;
+    border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; }
+  .close-btn:active { background: var(--bg2); }
+  #settings-body { flex: 1; overflow-y: auto; padding: 20px; }
+  .settings-zone { background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
+  .sz-header { padding: 14px 16px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border); background: var(--bg2); }
+  .sz-icon { font-size: 22px; }
+  .sz-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1.5px; flex: 1; }
+  .sz-count { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .sz-body { padding: 8px 12px 12px; }
+  .sz-ex-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
+  .sz-ex-input { flex: 1; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); padding: 10px 12px; font-size: 14px;
+    font-family: inherit; outline: none; user-select: text; transition: border-color 0.2s; }
+  .sz-ex-input:focus { border-color: var(--red); }
+  .sz-action-btn { background: var(--bg2); border: 1px solid var(--border); color: var(--muted);
+    width: 36px; height: 36px; border-radius: var(--radius-sm); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 14px; transition: color 0.2s, border-color 0.2s; }
+  .sz-action-btn.delete:active { color: var(--red); border-color: var(--red); }
+  .sz-action-btn.add { width: 100%; margin-top: 8px;
+    color: var(--green); border: 1.5px dashed var(--border);
+    padding: 10px; font-size: 12px; gap: 6px;
+    text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+    height: auto; }
+  .sz-action-btn.add:active { border-color: var(--green); }
 
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -365,13 +301,11 @@
 </head>
 <body>
 
-<!-- ── Loading splash ── -->
 <div id="loading">
   <div class="splash-logo">GAIN<span>Z</span></div>
   <div class="spinner"></div>
 </div>
 
-<!-- ── Auth screen ── -->
 <div id="auth-screen">
   <div class="auth-logo">GAIN<span>Z</span></div>
   <div class="auth-tagline">No excuses</div>
@@ -387,18 +321,18 @@
   </div>
 </div>
 
-<!-- ── App ── -->
 <div id="app">
   <header>
-    <div>
-      <div class="app-logo">GAIN<span>Z</span></div>
-    </div>
+    <div><div class="app-logo">GAIN<span>Z</span></div></div>
     <div class="app-user">
       <div class="app-user-info">
         <strong id="hdr-day">Monday</strong>
         <span id="hdr-date">01 Jan 2025</span>
       </div>
-      <button class="signout-btn" onclick="doSignOut()">Sign out</button>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openSettings()">⚙ Settings</button>
+        <button class="icon-btn" onclick="doSignOut()">Sign out</button>
+      </div>
     </div>
   </header>
 
@@ -413,18 +347,39 @@
       <div class="exercises-section" id="exercises-section">
         <div class="section-title" id="ex-section-label">Exercises</div>
         <div id="exercises-list"></div>
-        <button class="log-btn" id="log-btn" onclick="logWorkout()">
-          <span>LOG WORKOUT</span>
-        </button>
+        <button class="log-btn" id="log-btn" onclick="logWorkout()"><span>LOG WORKOUT</span></button>
       </div>
     </div>
+
+    <div class="page" id="page-progress">
+      <div id="progress-list-view">
+        <div class="section-title">Progress per exercise</div>
+        <div class="progress-zone-filter" id="progress-zone-filter">
+          <div class="filter-chip active" onclick="filterProgress('All', this)">All</div>
+        </div>
+        <div class="progress-exercise-list" id="progress-list"></div>
+      </div>
+      <div id="progress-detail-view" style="display:none">
+        <button class="back-btn" onclick="closeProgressDetail()">← Back</button>
+        <div class="chart-card">
+          <div class="chart-title" id="chart-title"></div>
+          <div class="chart-subtitle" id="chart-subtitle"></div>
+          <div class="chart-summary" id="chart-summary"></div>
+          <div id="progress-chart-wrap"><canvas id="progress-chart"></canvas></div>
+        </div>
+        <div class="section-title">All entries</div>
+        <div id="progress-entries"></div>
+      </div>
+    </div>
+
     <div class="page" id="page-history">
       <div class="section-title">Training history</div>
       <div class="history-filters" id="history-filters">
-        <div class="filter-chip active" data-zone="All" onclick="filterHistory('All', this)">All</div>
+        <div class="filter-chip active" onclick="filterHistory('All', this)">All</div>
       </div>
       <div id="history-list"></div>
     </div>
+
     <div class="page" id="page-stats">
       <div class="section-title">Overview</div>
       <div class="stats-grid" id="stats-grid"></div>
@@ -435,33 +390,41 @@
 
   <nav>
     <button class="active" onclick="showPage('log', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 4v16M10 4v16M14 4l4 0M14 12l4 0M14 20l4-4"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v16M10 4v16M14 4l4 0M14 12l4 0M14 20l4-4"/></svg>
       Log
     </button>
+    <button onclick="showPage('progress', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+      Progress
+    </button>
     <button onclick="showPage('history', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
       History
     </button>
     <button onclick="showPage('stats', this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 20h18M8 20V10M12 20V4M16 20v-6"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M8 20V10M12 20V4M16 20v-6"/></svg>
       Stats
     </button>
   </nav>
 </div>
 
+<div id="settings-modal">
+  <div class="settings-header">
+    <div class="settings-title">Settings</div>
+    <button class="close-btn" onclick="closeSettings()">✕</button>
+  </div>
+  <div id="settings-body">
+    <div class="section-title">Customize exercises</div>
+    <div id="settings-zones"></div>
+    <p style="color:var(--muted); font-size:11px; line-height:1.6; margin-top:20px; text-align:center;">
+      Changes save automatically. Renaming an exercise also updates your past history entries.
+    </p>
+  </div>
+</div>
+
 <div id="toast"></div>
 
-<!-- ═════════════════════════════════════════════════════════════
-     FIREBASE + APP LOGIC
-     ═════════════════════════════════════════════════════════════ -->
 <script type="module">
-  // ── Firebase imports ────────────────────────────────────────
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import {
     getAuth, onAuthStateChanged,
@@ -469,12 +432,11 @@
     signOut, setPersistence, browserLocalPersistence
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import {
-    getFirestore, collection, addDoc, deleteDoc, doc,
+    getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, setDoc, getDoc,
     query, where, orderBy, onSnapshot, serverTimestamp,
-    enableIndexedDbPersistence
+    enableIndexedDbPersistence, writeBatch, getDocs
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  // ── Firebase config (your gainz project) ────────────────────
   const firebaseConfig = {
     apiKey: "AIzaSyAoPEDcgzV4UWtSjoStMiNDAkwvy3c6YIE",
     authDomain: "gainz-84e30.firebaseapp.com",
@@ -489,81 +451,68 @@
   const auth  = getAuth(fbApp);
   const db    = getFirestore(fbApp);
 
-  // Offline persistence — works when you're at the gym with no signal
-  try {
-    await enableIndexedDbPersistence(db);
-  } catch (err) {
-    console.warn('Offline persistence unavailable:', err.code);
-  }
+  try { await enableIndexedDbPersistence(db); }
+  catch (err) { console.warn('Offline persistence:', err.code); }
 
   await setPersistence(auth, browserLocalPersistence);
 
-  // ── Expose to window so inline onclick handlers work ────────
-  window.__fb = { auth, db, collection, addDoc, query, where, orderBy,
-                  onSnapshot, serverTimestamp, doc, deleteDoc,
-                  signInWithEmailAndPassword, createUserWithEmailAndPassword,
-                  signOut, onAuthStateChanged };
-
-  // Trigger main app boot
+  window.__fb = {
+    auth, db,
+    collection, addDoc, deleteDoc, updateDoc, doc, setDoc, getDoc,
+    query, where, orderBy, onSnapshot, serverTimestamp,
+    writeBatch, getDocs,
+    signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged
+  };
   window.dispatchEvent(new Event('firebase-ready'));
 </script>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//  WORKOUT DATA + APP STATE
-// ═══════════════════════════════════════════════════════════
-const ZONES = {
-  Chest:     { icon: '🫁', exercises: ['Pushups', 'Pec Dec', 'Chest Pullups', 'High Angle Press'] },
-  Arms:      { icon: '💪', exercises: ['Triceps Push Rope', 'Triceps Push Handles', 'Biceps Rope', 'Biceps Handle'] },
-  Shoulders: { icon: '🏔️', exercises: ['Lats', 'Shoulder Press', 'Rotations', 'Dumbbell Rotations'] },
-  Back:      { icon: '🦅', exercises: ['Pullups', 'Rows', 'Flags', 'Pulldowns'] },
-  Abs:       { icon: '🔥', exercises: ['Abs'] }
+const ZONE_ICONS = { Chest: '🫁', Arms: '💪', Shoulders: '🏔️', Back: '🦅', Abs: '🔥' };
+const DEFAULT_EXERCISES = {
+  Chest:     ['Pushups', 'Pec Dec', 'Chest Pullups', 'High Angle Press'],
+  Arms:      ['Triceps Push Rope', 'Triceps Push Handles', 'Biceps Rope', 'Biceps Handle'],
+  Shoulders: ['Lats', 'Shoulder Press', 'Rotations', 'Dumbbell Rotations'],
+  Back:      ['Pullups', 'Rows', 'Flags', 'Pulldowns'],
+  Abs:       ['Abs']
 };
 
+let zonesConfig    = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
 let selectedZone   = null;
 let historyFilter  = 'All';
-let historyCache   = [];      // mirror of Firestore data, sorted oldest→newest
+let progressZoneFilter = 'All';
+let historyCache   = [];
 let unsubscribeHistory = null;
+let unsubscribeConfig  = null;
 let currentUser    = null;
-let authMode       = 'login'; // 'login' | 'signup'
+let authMode       = 'login';
+let progressChart  = null;
 
-// ═══════════════════════════════════════════════════════════
-//  BOOT — wait for Firebase to be ready
-// ═══════════════════════════════════════════════════════════
 window.addEventListener('firebase-ready', () => {
   const { auth, onAuthStateChanged } = window.__fb;
-
-  // Header date
   const now = new Date();
-  document.getElementById('hdr-day').textContent =
-    now.toLocaleDateString('en-GB', { weekday: 'long' });
-  document.getElementById('hdr-date').textContent =
-    now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  document.getElementById('hdr-day').textContent  = now.toLocaleDateString('en-GB', { weekday: 'long' });
+  document.getElementById('hdr-date').textContent = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  // Auth listener
   onAuthStateChanged(auth, (user) => {
     document.getElementById('loading').style.display = 'none';
     currentUser = user;
-
     if (user) {
       document.getElementById('auth-screen').classList.remove('visible');
       document.getElementById('app').classList.add('visible');
-      buildZonesGrid();
-      buildHistoryFilters();
+      subscribeToConfig();
       subscribeToHistory();
       maybeMigrateLocalData();
     } else {
       if (unsubscribeHistory) { unsubscribeHistory(); unsubscribeHistory = null; }
+      if (unsubscribeConfig)  { unsubscribeConfig();  unsubscribeConfig  = null; }
       historyCache = [];
+      zonesConfig = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
       document.getElementById('app').classList.remove('visible');
       document.getElementById('auth-screen').classList.add('visible');
     }
   });
 });
 
-// ═══════════════════════════════════════════════════════════
-//  AUTH UI
-// ═══════════════════════════════════════════════════════════
 function setAuthTab(mode) {
   authMode = mode;
   document.getElementById('tab-login').classList.toggle('active', mode === 'login');
@@ -572,28 +521,20 @@ function setAuthTab(mode) {
   document.getElementById('auth-error').textContent = '';
   document.getElementById('auth-password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
 }
-
 async function doAuth() {
   const email = document.getElementById('auth-email').value.trim();
   const pw    = document.getElementById('auth-password').value;
   const err   = document.getElementById('auth-error');
   const btn   = document.getElementById('auth-submit');
-
   err.textContent = '';
-  if (!email || !pw) { err.textContent = 'Enter both email and password'; return; }
-  if (pw.length < 6) { err.textContent = 'Password must be at least 6 characters'; return; }
-
+  if (!email || !pw)  { err.textContent = 'Enter both email and password'; return; }
+  if (pw.length < 6)  { err.textContent = 'Password must be at least 6 characters'; return; }
   btn.disabled = true;
   btn.textContent = 'Loading...';
-
   const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.__fb;
-
   try {
-    if (authMode === 'login') {
-      await signInWithEmailAndPassword(auth, email, pw);
-    } else {
-      await createUserWithEmailAndPassword(auth, email, pw);
-    }
+    if (authMode === 'login') await signInWithEmailAndPassword(auth, email, pw);
+    else                       await createUserWithEmailAndPassword(auth, email, pw);
   } catch (e) {
     err.textContent = friendlyError(e.code);
   } finally {
@@ -601,49 +542,60 @@ async function doAuth() {
     btn.textContent = authMode === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
   }
 }
-
 function friendlyError(code) {
   const m = {
-    'auth/invalid-email':       'Invalid email address',
-    'auth/email-already-in-use':'Email already registered — try logging in',
-    'auth/wrong-password':      'Wrong password',
-    'auth/user-not-found':      'No account with that email',
-    'auth/weak-password':       'Password too weak (6+ characters)',
+    'auth/invalid-email': 'Invalid email address',
+    'auth/email-already-in-use': 'Email already registered — try logging in',
+    'auth/wrong-password': 'Wrong password',
+    'auth/user-not-found': 'No account with that email',
+    'auth/weak-password': 'Password too weak (6+ characters)',
     'auth/network-request-failed': 'Network error — check your connection',
-    'auth/invalid-credential':  'Wrong email or password'
+    'auth/invalid-credential': 'Wrong email or password'
   };
   return m[code] || 'Something went wrong — try again';
 }
+async function doSignOut() { await window.__fb.signOut(window.__fb.auth); }
 
-async function doSignOut() {
-  const { auth, signOut } = window.__fb;
-  await signOut(auth);
+// ── Config sync ──
+function subscribeToConfig() {
+  if (!currentUser) return;
+  const { db, doc, onSnapshot, setDoc } = window.__fb;
+  const ref = doc(db, 'users', currentUser.uid, 'config', 'zones');
+  unsubscribeConfig = onSnapshot(ref, async (snap) => {
+    if (!snap.exists()) {
+      try { await setDoc(ref, DEFAULT_EXERCISES); } catch(e) { console.error(e); }
+      zonesConfig = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+    } else {
+      const data = snap.data();
+      const merged = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+      Object.keys(merged).forEach(z => {
+        if (Array.isArray(data[z])) merged[z] = data[z];
+      });
+      zonesConfig = merged;
+    }
+    buildZonesGrid();
+    buildHistoryFilters();
+    buildProgressFilters();
+    refreshActivePage();
+  });
+}
+async function saveConfig() {
+  if (!currentUser) return;
+  const { db, doc, setDoc } = window.__fb;
+  await setDoc(doc(db, 'users', currentUser.uid, 'config', 'zones'), zonesConfig);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  FIRESTORE SYNC
-// ═══════════════════════════════════════════════════════════
+// ── History sync ──
 function subscribeToHistory() {
   if (!currentUser) return;
   const { db, collection, query, orderBy, onSnapshot } = window.__fb;
-
   showSync('Syncing...');
-
-  const q = query(
-    collection(db, 'users', currentUser.uid, 'entries'),
-    orderBy('ts', 'asc')
-  );
+  const q = query(collection(db, 'users', currentUser.uid, 'entries'), orderBy('ts', 'asc'));
   unsubscribeHistory = onSnapshot(q,
     (snap) => {
       historyCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       hideSync();
-      // Refresh the visible page
-      const active = document.querySelector('.page.active');
-      if (active) {
-        if (active.id === 'page-log' && selectedZone)   renderExercises(selectedZone);
-        if (active.id === 'page-history')               renderHistory();
-        if (active.id === 'page-stats')                 renderStats();
-      }
+      refreshActivePage();
     },
     (err) => {
       console.error('Sync error:', err);
@@ -651,88 +603,115 @@ function subscribeToHistory() {
     }
   );
 }
-
+function refreshActivePage() {
+  const active = document.querySelector('.page.active');
+  if (!active) return;
+  if (active.id === 'page-log' && selectedZone) renderExercises(selectedZone);
+  if (active.id === 'page-history')             renderHistory();
+  if (active.id === 'page-stats')               renderStats();
+  if (active.id === 'page-progress')            renderProgressList();
+}
 async function addEntry(date, zone, exercise, value) {
   if (!currentUser) return;
   const { db, collection, addDoc, serverTimestamp } = window.__fb;
   await addDoc(collection(db, 'users', currentUser.uid, 'entries'), {
-    date, zone, exercise, value,
-    ts: serverTimestamp()
+    date, zone, exercise, value, ts: serverTimestamp()
   });
 }
-
-function getLastRecord(zone, exercise) {
-  const matches = historyCache.filter(e => e.zone === zone && e.exercise === exercise);
-  return matches.length ? matches[matches.length - 1].value : null;
+async function renameInHistory(zone, oldName, newName) {
+  if (!currentUser || oldName === newName) return;
+  const { db, collection, query, where, getDocs, writeBatch } = window.__fb;
+  const q = query(
+    collection(db, 'users', currentUser.uid, 'entries'),
+    where('zone', '==', zone),
+    where('exercise', '==', oldName)
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) return;
+  const batch = writeBatch(db);
+  snap.forEach(d => batch.update(d.ref, { exercise: newName }));
+  await batch.commit();
 }
-
-// One-time migration: if Firestore is empty and localStorage has entries, push them up
+function getLastRecord(zone, exercise) {
+  const m = historyCache.filter(e => e.zone === zone && e.exercise === exercise);
+  return m.length ? m[m.length - 1].value : null;
+}
 async function maybeMigrateLocalData() {
-  // Wait a bit for the first onSnapshot to complete
   setTimeout(async () => {
     if (historyCache.length > 0) return;
     let local;
-    try { local = JSON.parse(localStorage.getItem('gainz_history') || '[]'); }
-    catch { return; }
+    try { local = JSON.parse(localStorage.getItem('gainz_history') || '[]'); } catch { return; }
     if (!Array.isArray(local) || local.length === 0) return;
-
-    showToast(`Importing ${local.length} entries from this device...`, '#4f8ef7');
+    showToast(`Importing ${local.length} entries...`, '#4f8ef7');
     for (const e of local) {
-      try {
-        await addEntry(e.date, e.zone, e.exercise, e.value);
-      } catch (err) { console.error('Migrate err:', err); }
+      try { await addEntry(e.date, e.zone, e.exercise, e.value); } catch (err) { console.error(err); }
     }
     localStorage.removeItem('gainz_history');
     showToast(`✅ Imported ${local.length} entries`);
   }, 1500);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  UI BUILDERS
-// ═══════════════════════════════════════════════════════════
+// ── UI builders ──
 function buildZonesGrid() {
   const grid = document.getElementById('zones-grid');
-  if (grid.children.length) return;
-  Object.entries(ZONES).forEach(([name, data]) => {
+  grid.innerHTML = '';
+  Object.entries(zonesConfig).forEach(([name, exs]) => {
     const card = document.createElement('div');
     card.className = 'zone-card';
+    if (selectedZone === name) card.classList.add('selected');
     card.dataset.zone = name;
     card.innerHTML = `
       <div class="zone-dot"></div>
-      <div class="zone-icon">${data.icon}</div>
+      <div class="zone-icon">${ZONE_ICONS[name] || '🏋️'}</div>
       <div class="zone-name">${name}</div>
-      <div class="zone-count">${data.exercises.length} exercise${data.exercises.length > 1 ? 's' : ''}</div>
+      <div class="zone-count">${exs.length} exercise${exs.length === 1 ? '' : 's'}</div>
     `;
     card.onclick = () => selectZone(name);
     grid.appendChild(card);
   });
 }
-
 function buildHistoryFilters() {
-  const filters = document.getElementById('history-filters');
-  if (filters.children.length > 1) return;
-  Object.keys(ZONES).forEach(zone => {
+  const f = document.getElementById('history-filters');
+  f.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'filter-chip' + (historyFilter === 'All' ? ' active' : '');
+  all.textContent = 'All';
+  all.onclick = function() { filterHistory('All', this); };
+  f.appendChild(all);
+  Object.keys(zonesConfig).forEach(zone => {
     const chip = document.createElement('div');
-    chip.className = 'filter-chip';
-    chip.dataset.zone = zone;
+    chip.className = 'filter-chip' + (historyFilter === zone ? ' active' : '');
     chip.textContent = zone;
     chip.onclick = function() { filterHistory(zone, this); };
-    filters.appendChild(chip);
+    f.appendChild(chip);
+  });
+}
+function buildProgressFilters() {
+  const f = document.getElementById('progress-zone-filter');
+  f.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'filter-chip' + (progressZoneFilter === 'All' ? ' active' : '');
+  all.textContent = 'All';
+  all.onclick = function() { filterProgress('All', this); };
+  f.appendChild(all);
+  Object.keys(zonesConfig).forEach(zone => {
+    const chip = document.createElement('div');
+    chip.className = 'filter-chip' + (progressZoneFilter === zone ? ' active' : '');
+    chip.textContent = zone;
+    chip.onclick = function() { filterProgress(zone, this); };
+    f.appendChild(chip);
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-//  NAVIGATION
-// ═══════════════════════════════════════════════════════════
 function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   btn.classList.add('active');
-  if (name === 'history') renderHistory();
-  if (name === 'stats')   renderStats();
+  if (name === 'history')  renderHistory();
+  if (name === 'stats')    renderStats();
+  if (name === 'progress') { closeProgressDetail(); renderProgressList(); }
 }
-
 function selectZone(zone) {
   selectedZone = zone;
   document.querySelectorAll('.zone-card').forEach(c => c.classList.toggle('selected', c.dataset.zone === zone));
@@ -744,66 +723,53 @@ function selectZone(zone) {
   }, 100);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  EXERCISES (log page)
-// ═══════════════════════════════════════════════════════════
 function renderExercises(zone) {
   const list = document.getElementById('exercises-list');
-  // preserve current input values during re-render
   const current = {};
   list.querySelectorAll('input').forEach(i => { current[i.id] = i.value; });
-
   list.innerHTML = '';
-  ZONES[zone].exercises.forEach((ex, i) => {
+  const exs = zonesConfig[zone] || [];
+  if (exs.length === 0) {
+    list.innerHTML = `<div class="empty-state"><p>No exercises in this zone yet.<br>Open Settings to add some.</p></div>`;
+    return;
+  }
+  exs.forEach((ex, i) => {
     const last = getLastRecord(zone, ex);
     const card = document.createElement('div');
     card.className = 'exercise-card';
     card.innerHTML = `
       <div>
-        <div class="ex-name">${ex}</div>
-        <div class="ex-last ${last ? '' : 'empty'}">${last || 'No record yet'}</div>
+        <div class="ex-name">${escapeHtml(ex)}</div>
+        <div class="ex-last ${last ? '' : 'empty'}">${last ? escapeHtml(last) : 'No record yet'}</div>
       </div>
       <input class="ex-input" id="input-${i}" type="text" inputmode="text"
              placeholder="e.g. 80kg 3×10" autocomplete="off" spellcheck="false"
-             value="${current['input-' + i] || ''}">
+             value="${escapeHtml(current['input-' + i] || '')}">
     `;
     list.appendChild(card);
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-//  LOG WORKOUT (writes to Firestore)
-// ═══════════════════════════════════════════════════════════
 async function logWorkout() {
   if (!selectedZone || !currentUser) return;
-
-  const exercises = ZONES[selectedZone].exercises;
+  const exs = zonesConfig[selectedZone] || [];
   const today = new Date().toLocaleDateString('en-GB');
   let logged = 0;
-
   showSync('Saving...');
   const writes = [];
-  exercises.forEach((ex, i) => {
+  exs.forEach((ex, i) => {
     const input = document.getElementById('input-' + i);
     const val = input ? input.value.trim() : '';
-    if (val) {
-      writes.push(addEntry(today, selectedZone, ex, val));
-      logged++;
-    }
+    if (val) { writes.push(addEntry(today, selectedZone, ex, val)); logged++; }
   });
-
   if (logged === 0) {
     hideSync();
     showToast('Fill in at least one exercise! 📝', '#ff3c5f');
     return;
   }
-
   try {
     await Promise.all(writes);
-    exercises.forEach((_, i) => {
-      const input = document.getElementById('input-' + i);
-      if (input) input.value = '';
-    });
+    exs.forEach((_, i) => { const input = document.getElementById('input-' + i); if (input) input.value = ''; });
     hideSync();
     showToast(`✅ ${logged} exercise${logged > 1 ? 's' : ''} logged!`);
   } catch (e) {
@@ -813,58 +779,40 @@ async function logWorkout() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-//  HISTORY
-// ═══════════════════════════════════════════════════════════
 function filterHistory(zone, chipEl) {
   historyFilter = zone;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#history-filters .filter-chip').forEach(c => c.classList.remove('active'));
   chipEl.classList.add('active');
   renderHistory();
 }
-
 function renderHistory() {
   const list = document.getElementById('history-list');
   let data = historyCache.slice().reverse();
   if (historyFilter !== 'All') data = data.filter(e => e.zone === historyFilter);
-
   if (!data.length) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="es-icon">🏋️</div>
-      <p>No workouts yet.<br>Start logging and your history will appear here.</p>
-    </div>`;
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🏋️</div><p>No workouts yet.<br>Start logging and your history will appear here.</p></div>`;
     return;
   }
-
   const grouped = {};
-  data.forEach(e => { if (!grouped[e.date]) grouped[e.date] = []; grouped[e.date].push(e); });
-
+  data.forEach(e => { (grouped[e.date] = grouped[e.date] || []).push(e); });
   list.innerHTML = '';
   Object.entries(grouped).forEach(([date, entries], gi) => {
     const label = document.createElement('div');
     label.className = 'history-day-label';
     label.textContent = formatDateLabel(date);
     list.appendChild(label);
-
     entries.forEach((e, ei) => {
       const row = document.createElement('div');
       row.className = 'history-entry';
       if (gi === 0 && ei === 0) row.style.borderColor = 'var(--red)';
       row.innerHTML = `
-        <div class="he-left">
-          <div class="he-ex">${e.exercise}</div>
-          <div class="he-zone">${e.zone}</div>
-        </div>
-        <div class="he-right">
-          <div class="he-value">${e.value}</div>
-          <div class="he-date">${e.date}</div>
-        </div>
+        <div class="he-left"><div class="he-ex">${escapeHtml(e.exercise)}</div><div class="he-zone">${escapeHtml(e.zone)}</div></div>
+        <div class="he-right"><div class="he-value">${escapeHtml(e.value)}</div><div class="he-date">${escapeHtml(e.date)}</div></div>
       `;
       list.appendChild(row);
     });
   });
 }
-
 function formatDateLabel(dateStr) {
   const [d, m, y] = dateStr.split('/');
   const date = new Date(y, m - 1, d);
@@ -876,35 +824,28 @@ function formatDateLabel(dateStr) {
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-// ═══════════════════════════════════════════════════════════
-//  STATS
-// ═══════════════════════════════════════════════════════════
 function renderStats() {
   const totalSessions = new Set(historyCache.map(e => e.date + e.zone)).size;
   const totalEntries  = historyCache.length;
   const streak        = calcStreak(historyCache);
   const topZone       = calcTopZone(historyCache);
-
   document.getElementById('stats-grid').innerHTML = `
     <div class="stat-card"><div class="stat-value">${totalSessions}</div><div class="stat-label">Sessions</div></div>
     <div class="stat-card"><div class="stat-value">${streak}</div><div class="stat-label">Day streak 🔥</div></div>
     <div class="stat-card"><div class="stat-value">${totalEntries}</div><div class="stat-label">Sets logged</div></div>
     <div class="stat-card"><div class="stat-value">${topZone || '—'}</div><div class="stat-label">Fav zone</div></div>
   `;
-
   const pb = document.getElementById('pb-section');
   const bests = {};
   historyCache.forEach(e => { bests[e.exercise] = e.value; });
-
   if (!Object.keys(bests).length) {
     pb.innerHTML = '<div class="empty-state" style="padding:30px 0"><p>Log your first workout to see personal bests.</p></div>';
     return;
   }
-  pb.innerHTML = Object.entries(bests).map(([ex, val]) => `
-    <div class="pb-row"><div class="pb-ex">${ex}</div><div class="pb-val">${val}</div></div>
-  `).join('');
+  pb.innerHTML = Object.entries(bests).map(([ex, val]) =>
+    `<div class="pb-row"><div class="pb-ex">${escapeHtml(ex)}</div><div class="pb-val">${escapeHtml(val)}</div></div>`
+  ).join('');
 }
-
 function calcStreak(history) {
   const dates = [...new Set(history.map(e => e.date))].sort().reverse();
   if (!dates.length) return 0;
@@ -919,16 +860,270 @@ function calcStreak(history) {
   }
   return streak;
 }
-
 function calcTopZone(history) {
   const counts = {};
   history.forEach(e => { counts[e.zone] = (counts[e.zone] || 0) + 1; });
   return Object.entries(counts).sort((a,b) => b[1]-a[1])[0]?.[0] || null;
 }
 
-// ═══════════════════════════════════════════════════════════
-//  TOAST + SYNC INDICATOR
-// ═══════════════════════════════════════════════════════════
+// ── Progress page ──
+function extractWeight(str) {
+  if (!str) return null;
+  const s = String(str);
+  const kg = s.match(/(\d+(?:\.\d+)?)\s*kg/i);
+  if (kg) return parseFloat(kg[1]);
+  const lb = s.match(/(\d+(?:\.\d+)?)\s*lb/i);
+  if (lb) return parseFloat(lb[1]);
+  const nums = s.match(/\d+(?:\.\d+)?/g);
+  if (!nums) return null;
+  return Math.max(...nums.map(parseFloat));
+}
+function filterProgress(zone, chipEl) {
+  progressZoneFilter = zone;
+  document.querySelectorAll('#progress-zone-filter .filter-chip').forEach(c => c.classList.remove('active'));
+  chipEl.classList.add('active');
+  renderProgressList();
+}
+function renderProgressList() {
+  const list = document.getElementById('progress-list');
+  const showZones = progressZoneFilter === 'All' ? Object.keys(zonesConfig) : [progressZoneFilter];
+  const items = [];
+  showZones.forEach(zone => {
+    (zonesConfig[zone] || []).forEach(ex => {
+      const entries = historyCache.filter(e => e.zone === zone && e.exercise === ex);
+      const weights = entries.map(e => extractWeight(e.value)).filter(n => n !== null);
+      let trend = 'flat', label = '—';
+      if (weights.length >= 2) {
+        const first = weights[0], last = weights[weights.length - 1];
+        const delta = last - first;
+        const pct = first > 0 ? Math.round((delta / first) * 100) : 0;
+        if (delta > 0)      { trend = 'up';   label = `+${(Math.round(delta * 10) / 10)} (${pct >= 0 ? '+' : ''}${pct}%)`; }
+        else if (delta < 0) { trend = 'down'; label = `${(Math.round(delta * 10) / 10)} (${pct}%)`; }
+        else                { trend = 'flat'; label = 'no change'; }
+      } else if (weights.length === 1) {
+        label = '1 record';
+      } else if (entries.length > 0) {
+        label = `${entries.length} entries`;
+      }
+      items.push({ zone, exercise: ex, count: entries.length, trend, label });
+    });
+  });
+  if (items.every(i => i.count === 0)) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">📈</div><p>No data yet.<br>Log a few workouts to see your progress.</p></div>`;
+    return;
+  }
+  list.innerHTML = '';
+  items.forEach(it => {
+    const card = document.createElement('div');
+    card.className = 'progress-exercise-card';
+    if (it.count === 0) card.style.opacity = '0.45';
+    card.innerHTML = `
+      <div style="min-width:0; flex:1">
+        <div class="pec-name">${escapeHtml(it.exercise)}</div>
+        <div class="pec-meta">${escapeHtml(it.zone)} · ${it.count} entr${it.count === 1 ? 'y' : 'ies'}</div>
+      </div>
+      <div class="pec-trend ${it.trend}">
+        ${it.trend === 'up' ? '↗' : it.trend === 'down' ? '↘' : '→'} ${escapeHtml(it.label)}
+      </div>
+    `;
+    if (it.count > 0) card.onclick = () => openProgressDetail(it.zone, it.exercise);
+    list.appendChild(card);
+  });
+}
+function openProgressDetail(zone, exercise) {
+  document.getElementById('progress-list-view').style.display = 'none';
+  document.getElementById('progress-detail-view').style.display = 'block';
+  document.getElementById('chart-title').textContent = exercise;
+  document.getElementById('chart-subtitle').textContent = zone;
+
+  const entries = historyCache.filter(e => e.zone === zone && e.exercise === exercise);
+  const points = entries.map(e => ({ ...e, weight: extractWeight(e.value) })).filter(e => e.weight !== null);
+
+  const weights = points.map(p => p.weight);
+  const minW  = weights.length ? Math.min(...weights) : 0;
+  const maxW  = weights.length ? Math.max(...weights) : 0;
+  const lastW = weights.length ? weights[weights.length - 1] : 0;
+
+  document.getElementById('chart-summary').innerHTML = `
+    <div class="cs-item"><div class="cs-value">${formatNum(minW)}</div><div class="cs-label">Min</div></div>
+    <div class="cs-item"><div class="cs-value">${formatNum(lastW)}</div><div class="cs-label">Latest</div></div>
+    <div class="cs-item"><div class="cs-value">${formatNum(maxW)}</div><div class="cs-label">Best</div></div>
+  `;
+
+  if (progressChart) { progressChart.destroy(); progressChart = null; }
+
+  const wrap = document.getElementById('progress-chart-wrap');
+  if (points.length === 0) {
+    wrap.innerHTML = '<div class="empty-state" style="padding:30px 0"><p>No numeric data found.<br>Try entries like "80kg 3×10".</p></div>';
+  } else {
+    wrap.innerHTML = '<canvas id="progress-chart"></canvas>';
+    const ctx = document.getElementById('progress-chart').getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, 0, 220);
+    grad.addColorStop(0, 'rgba(255, 60, 95, 0.35)');
+    grad.addColorStop(1, 'rgba(255, 60, 95, 0)');
+
+    progressChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: points.map(p => p.date),
+        datasets: [{
+          label: 'Weight',
+          data: points.map(p => p.weight),
+          borderColor: '#ff3c5f',
+          backgroundColor: grad,
+          borderWidth: 2.5,
+          tension: 0.3,
+          fill: true,
+          pointBackgroundColor: '#ff3c5f',
+          pointBorderColor: '#0d0d1a',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e1e30', titleColor: '#f0f0f8',
+            bodyColor: '#f5c842', borderColor: '#2a2a40', borderWidth: 1,
+            padding: 10, displayColors: false,
+            callbacks: { label: ctx => `${ctx.parsed.y}` }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#7070a0', font: { size: 10, family: 'DM Mono' }, maxRotation: 0, autoSkip: true, maxTicksLimit: 5 },
+            grid: { color: '#2a2a40' }
+          },
+          y: {
+            ticks: { color: '#7070a0', font: { size: 10, family: 'DM Mono' } },
+            grid: { color: '#2a2a40' },
+            beginAtZero: false
+          }
+        }
+      }
+    });
+  }
+
+  const entriesList = document.getElementById('progress-entries');
+  if (entries.length === 0) entriesList.innerHTML = '';
+  else entriesList.innerHTML = entries.slice().reverse().map(e => `
+    <div class="history-entry">
+      <div class="he-left"><div class="he-ex">${escapeHtml(e.exercise)}</div><div class="he-zone">${escapeHtml(e.zone)}</div></div>
+      <div class="he-right"><div class="he-value">${escapeHtml(e.value)}</div><div class="he-date">${escapeHtml(e.date)}</div></div>
+    </div>
+  `).join('');
+}
+function closeProgressDetail() {
+  document.getElementById('progress-list-view').style.display = 'block';
+  document.getElementById('progress-detail-view').style.display = 'none';
+  if (progressChart) { progressChart.destroy(); progressChart = null; }
+}
+function formatNum(n) {
+  if (n === null || n === undefined) return '—';
+  return Number.isInteger(n) ? String(n) : (Math.round(n * 10) / 10).toString();
+}
+
+// ── Settings ──
+function openSettings() {
+  document.getElementById('settings-modal').classList.add('visible');
+  renderSettings();
+}
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('visible');
+}
+function renderSettings() {
+  const body = document.getElementById('settings-zones');
+  body.innerHTML = '';
+  Object.keys(zonesConfig).forEach(zone => {
+    const exs = zonesConfig[zone];
+    const zd = document.createElement('div');
+    zd.className = 'settings-zone';
+    zd.innerHTML = `
+      <div class="sz-header">
+        <div class="sz-icon">${ZONE_ICONS[zone]}</div>
+        <div class="sz-name">${zone}</div>
+        <div class="sz-count">${exs.length} ex</div>
+      </div>
+      <div class="sz-body" id="sz-body-${zone}"></div>
+    `;
+    body.appendChild(zd);
+    const sub = document.getElementById(`sz-body-${zone}`);
+    exs.forEach((ex, idx) => {
+      const row = document.createElement('div');
+      row.className = 'sz-ex-row';
+      row.innerHTML = `
+        <input class="sz-ex-input" type="text" value="${escapeHtml(ex)}"
+               data-zone="${escapeHtml(zone)}" data-idx="${idx}" data-original="${escapeHtml(ex)}">
+        <button class="sz-action-btn delete" onclick="deleteExercise('${escapeAttr(zone)}', ${idx})">🗑</button>
+      `;
+      sub.appendChild(row);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.className = 'sz-action-btn add';
+    addBtn.textContent = '+ Add exercise';
+    addBtn.onclick = () => addExercise(zone);
+    sub.appendChild(addBtn);
+  });
+  document.querySelectorAll('.sz-ex-input').forEach(inp => {
+    inp.addEventListener('blur', async (e) => {
+      const zone = e.target.dataset.zone;
+      const idx  = parseInt(e.target.dataset.idx, 10);
+      const orig = e.target.dataset.original;
+      const newName = e.target.value.trim();
+      if (!newName) { e.target.value = orig; return; }
+      if (newName === orig) return;
+      zonesConfig[zone][idx] = newName;
+      e.target.dataset.original = newName;
+      showSync('Saving...');
+      try {
+        await Promise.all([ saveConfig(), renameInHistory(zone, orig, newName) ]);
+        hideSync();
+        showToast(`Renamed to "${newName}"`);
+      } catch (err) {
+        console.error(err);
+        hideSync();
+        showToast('Save failed', '#ff3c5f');
+      }
+    });
+  });
+}
+async function addExercise(zone) {
+  const name = prompt(`New exercise name for ${zone}:`);
+  if (!name || !name.trim()) return;
+  zonesConfig[zone].push(name.trim());
+  showSync('Saving...');
+  try {
+    await saveConfig();
+    hideSync();
+    showToast(`Added "${name.trim()}"`);
+    renderSettings();
+  } catch (err) { hideSync(); showToast('Save failed', '#ff3c5f'); }
+}
+async function deleteExercise(zone, idx) {
+  const name = zonesConfig[zone][idx];
+  if (!confirm(`Remove "${name}" from ${zone}?\n\nYour past history will keep these entries.`)) return;
+  zonesConfig[zone].splice(idx, 1);
+  showSync('Saving...');
+  try {
+    await saveConfig();
+    hideSync();
+    showToast(`Removed "${name}"`);
+    renderSettings();
+  } catch (err) { hideSync(); showToast('Save failed', '#ff3c5f'); }
+}
+
+// ── Helpers ──
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+function escapeAttr(s) {
+  return String(s == null ? '' : s).replace(/'/g, "\\'");
+}
 function showToast(msg, color = '#39d98a') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -937,7 +1132,6 @@ function showToast(msg, color = '#39d98a') {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
-
 function showSync(text = 'Syncing...', color = '#39d98a') {
   const ind = document.getElementById('sync-indicator');
   document.getElementById('sync-text').textContent = text;
@@ -948,13 +1142,14 @@ function hideSync() {
   setTimeout(() => document.getElementById('sync-indicator').classList.remove('show'), 600);
 }
 
-// expose for inline handlers
-window.setAuthTab  = setAuthTab;
-window.doAuth      = doAuth;
-window.doSignOut   = doSignOut;
-window.showPage    = showPage;
-window.logWorkout  = logWorkout;
-window.filterHistory = filterHistory;
+Object.assign(window, {
+  setAuthTab, doAuth, doSignOut,
+  showPage, logWorkout,
+  filterHistory, filterProgress,
+  openProgressDetail, closeProgressDetail,
+  openSettings, closeSettings,
+  addExercise, deleteExercise
+});
 </script>
 </body>
 </html>
