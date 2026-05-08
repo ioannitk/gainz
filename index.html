@@ -30,24 +30,114 @@
     --radius:   16px;
     --radius-sm:10px;
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html, body {
     height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
     overflow: hidden;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
   }
 
-  /* ── App shell ──────────────────────────────────────── */
-  #app { display: flex; flex-direction: column; height: 100dvh; }
+  /* ── Loading splash ─────────────────────────────────── */
+  #loading {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+  }
+  #loading .splash-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px; letter-spacing: 5px;
+  }
+  #loading .splash-logo span { color: var(--red); }
+  #loading .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-top: 24px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Header ─────────────────────────────────────────── */
+  /* ── Auth screen ────────────────────────────────────── */
+  #auth-screen {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px; z-index: 100;
+  }
+  #auth-screen.visible { display: flex; }
+  .auth-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px; letter-spacing: 6px;
+    margin-bottom: 4px;
+  }
+  .auth-logo span { color: var(--red); }
+  .auth-tagline {
+    color: var(--muted); font-size: 12px;
+    letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+  .auth-card {
+    width: 100%; max-width: 360px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .auth-tabs { display: flex; gap: 4px; background: var(--bg2);
+    border-radius: var(--radius-sm); padding: 4px; margin-bottom: 20px; }
+  .auth-tab {
+    flex: 1; padding: 10px; text-align: center;
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-weight: 600; font-size: 13px;
+    border-radius: 8px; font-family: inherit;
+    text-transform: uppercase; letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .auth-tab.active { background: var(--card); color: var(--text); }
+  .auth-input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 14px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    margin-bottom: 12px;
+    outline: none;
+    user-select: text;
+    transition: border-color 0.2s;
+  }
+  .auth-input:focus { border-color: var(--red); }
+  .auth-btn {
+    width: 100%;
+    background: var(--red);
+    color: white; border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px;
+    padding: 14px; cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .auth-btn:active { background: var(--red-dim); transform: scale(0.98); }
+  .auth-btn:disabled { background: var(--border); color: var(--muted); }
+  .auth-error {
+    color: var(--red); font-size: 13px; margin-top: 12px;
+    text-align: center; min-height: 18px;
+  }
+
+  /* ── App shell ──────────────────────────────────────── */
+  #app { display: none; flex-direction: column; height: 100dvh; }
+  #app.visible { display: flex; }
+
   header {
     flex-shrink: 0;
     padding: 56px 20px 16px;
@@ -57,40 +147,58 @@
   }
   .app-logo {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 36px;
-    letter-spacing: 3px;
-    color: var(--text);
-    line-height: 1;
+    font-size: 32px; letter-spacing: 3px;
+    color: var(--text); line-height: 1;
   }
   .app-logo span { color: var(--red); }
-  .header-date {
-    font-size: 12px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    text-align: right;
-    line-height: 1.6;
+  .app-user {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
   }
-  .header-date strong { color: var(--text); font-weight: 500; display: block; font-size: 13px; }
+  .app-user-info {
+    font-size: 11px; color: var(--muted);
+    font-family: 'DM Mono', monospace; line-height: 1.4;
+    text-align: right;
+  }
+  .app-user-info strong { color: var(--text); font-weight: 500; display: block; font-size: 12px; }
+  .signout-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); font-size: 10px; font-family: inherit;
+    padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    margin-top: 6px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .signout-btn:active { background: var(--card); }
+
+  .sync-indicator {
+    position: fixed; top: 60px; right: 20px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); font-size: 10px;
+    padding: 4px 10px; border-radius: 999px;
+    display: flex; align-items: center; gap: 6px;
+    opacity: 0; transition: opacity 0.3s;
+    z-index: 50; pointer-events: none;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .sync-indicator.show { opacity: 1; }
+  .sync-indicator .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green); animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
 
   /* ── Bottom nav ──────────────────────────────────────── */
   nav {
     flex-shrink: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    background: var(--bg2); border-top: 1px solid var(--border);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   nav button {
     background: none; border: none; cursor: pointer;
     padding: 12px 4px 10px;
     display: flex; flex-direction: column; align-items: center; gap: 4px;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 10px; font-weight: 500;
-    letter-spacing: 0.5px;
-    transition: color 0.2s;
-    text-transform: uppercase;
+    color: var(--muted); font-family: inherit;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
+    transition: color 0.2s; text-transform: uppercase;
   }
   nav button.active { color: var(--red); }
   nav button svg { width: 22px; height: 22px; }
@@ -99,8 +207,7 @@
   #pages { flex: 1; overflow: hidden; position: relative; }
   .page {
     position: absolute; inset: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    overflow-y: auto; overscroll-behavior: contain;
     padding: 20px;
     opacity: 0; pointer-events: none;
     transform: translateY(12px);
@@ -108,11 +215,9 @@
   }
   .page.active { opacity: 1; pointer-events: all; transform: none; }
 
-  /* ── Zone picker ─────────────────────────────────────── */
   .section-title {
     font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--muted);
-    margin-bottom: 14px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
   }
 
   .zones-grid {
@@ -120,12 +225,9 @@
     margin-bottom: 28px;
   }
   .zone-card {
-    background: var(--card);
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 14px;
-    cursor: pointer;
-    display: flex; flex-direction: column; gap: 8px;
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: var(--radius); padding: 18px 14px;
+    cursor: pointer; display: flex; flex-direction: column; gap: 8px;
     transition: border-color 0.2s, background 0.2s, transform 0.15s;
     position: relative; overflow: hidden;
   }
@@ -137,131 +239,89 @@
   .zone-card .zone-icon { font-size: 28px; line-height: 1; }
   .zone-card .zone-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px; letter-spacing: 1px; line-height: 1;
-    color: var(--text);
+    font-size: 20px; letter-spacing: 1px; line-height: 1; color: var(--text);
   }
-  .zone-card .zone-count {
-    font-size: 11px; color: var(--muted); font-weight: 500;
-  }
+  .zone-card .zone-count { font-size: 11px; color: var(--muted); font-weight: 500; }
   .zone-card.selected .zone-count { color: var(--red); }
   .zone-card .zone-dot {
     position: absolute; top: 12px; right: 12px;
     width: 8px; height: 8px; border-radius: 50%;
-    background: var(--red); opacity: 0;
-    transition: opacity 0.2s;
+    background: var(--red); opacity: 0; transition: opacity 0.2s;
   }
   .zone-card.selected .zone-dot { opacity: 1; }
 
-  /* ── Exercise list ───────────────────────────────────── */
   .exercises-section { display: none; }
   .exercises-section.visible { display: block; }
-
   .exercise-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
     margin-bottom: 10px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-    align-items: center;
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 10px; align-items: center;
   }
-  .ex-name {
-    font-weight: 600; font-size: 15px;
-    text-transform: capitalize;
-    margin-bottom: 4px;
-  }
+  .ex-name { font-weight: 600; font-size: 15px; text-transform: capitalize; margin-bottom: 4px; }
   .ex-last {
     font-size: 12px; color: var(--green);
     font-family: 'DM Mono', monospace;
     display: flex; align-items: center; gap: 5px;
   }
-  .ex-last::before {
-    content: '↑';
-    font-size: 10px;
-    opacity: 0.7;
-  }
+  .ex-last::before { content: '↑'; font-size: 10px; opacity: 0.7; }
   .ex-last.empty { color: var(--muted); }
   .ex-last.empty::before { content: '—'; }
   .ex-input {
-    width: 130px;
-    background: var(--input-bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    padding: 10px 12px;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.2s;
-    user-select: text;
+    width: 130px; background: var(--input-bg);
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 14px; padding: 10px 12px; text-align: center;
+    outline: none; transition: border-color 0.2s; user-select: text;
   }
   .ex-input:focus { border-color: var(--red); }
   .ex-input::placeholder { color: var(--muted); font-size: 11px; }
 
-  /* ── Log button ──────────────────────────────────────── */
   .log-btn {
-    width: 100%;
-    background: var(--red);
-    color: white;
-    border: none;
+    width: 100%; background: var(--red); color: white; border: none;
     border-radius: var(--radius);
     font-family: 'Bebas Neue', sans-serif;
     font-size: 20px; letter-spacing: 2px;
-    padding: 18px;
-    cursor: pointer;
-    margin-top: 20px;
+    padding: 18px; cursor: pointer; margin-top: 20px;
     transition: background 0.2s, transform 0.15s;
     display: flex; align-items: center; justify-content: center; gap: 10px;
   }
   .log-btn:active { background: var(--red-dim); transform: scale(0.98); }
   .log-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
 
-  /* ── Toast ───────────────────────────────────────────── */
   #toast {
     position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
     background: var(--green); color: #0a1f14;
     font-weight: 600; font-size: 14px;
     padding: 12px 24px; border-radius: 999px;
     opacity: 0; transition: all 0.3s;
-    z-index: 999; white-space: nowrap;
-    pointer-events: none;
+    z-index: 999; white-space: nowrap; pointer-events: none;
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ── History page ────────────────────────────────────── */
   .history-filters {
     display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto;
     padding-bottom: 4px; -webkit-overflow-scrolling: touch;
   }
   .filter-chip {
-    flex-shrink: 0;
-    background: var(--card);
-    border: 1.5px solid var(--border);
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 12px; font-weight: 500;
-    color: var(--muted);
-    cursor: pointer; transition: all 0.2s;
+    flex-shrink: 0; background: var(--card);
+    border: 1.5px solid var(--border); border-radius: 999px;
+    padding: 6px 14px; font-size: 12px; font-weight: 500;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
   }
   .filter-chip.active { border-color: var(--red); color: var(--red); background: #2a1020; }
 
   .history-entry {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 13px 15px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 13px 15px;
     margin-bottom: 8px;
     display: flex; justify-content: space-between; align-items: center;
   }
-  .history-entry:first-of-type { border-color: var(--red); }
   .he-left .he-ex { font-weight: 600; font-size: 14px; text-transform: capitalize; }
   .he-left .he-zone {
     font-size: 11px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.5px;
-    margin-top: 2px;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
   }
   .he-right { text-align: right; }
   .he-value { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--gold); }
@@ -269,19 +329,14 @@
 
   .history-day-label {
     font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--muted);
-    margin: 18px 0 8px;
+    text-transform: uppercase; color: var(--muted); margin: 18px 0 8px;
   }
   .history-day-label:first-child { margin-top: 0; }
 
-  .empty-state {
-    text-align: center; padding: 60px 20px;
-    color: var(--muted);
-  }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; line-height: 1.6; }
 
-  /* ── Stats page ──────────────────────────────────────── */
   .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
   .stat-card {
     background: var(--card); border: 1px solid var(--border);
@@ -291,7 +346,8 @@
     font-family: 'Bebas Neue', sans-serif; font-size: 36px;
     color: var(--red); line-height: 1;
   }
-  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px; }
 
   .pb-section { margin-top: 8px; }
   .pb-row {
@@ -302,7 +358,6 @@
   .pb-ex { font-size: 13px; text-transform: capitalize; }
   .pb-val { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--gold); }
 
-  /* scrollbar */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -310,23 +365,51 @@
 </head>
 <body>
 
+<!-- ── Loading splash ── -->
+<div id="loading">
+  <div class="splash-logo">GAIN<span>Z</span></div>
+  <div class="spinner"></div>
+</div>
+
+<!-- ── Auth screen ── -->
+<div id="auth-screen">
+  <div class="auth-logo">GAIN<span>Z</span></div>
+  <div class="auth-tagline">No excuses</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="setAuthTab('login')">Log in</button>
+      <button class="auth-tab" id="tab-signup" onclick="setAuthTab('signup')">Sign up</button>
+    </div>
+    <input class="auth-input" id="auth-email" type="email" inputmode="email" autocomplete="email" placeholder="Email" autocapitalize="off" autocorrect="off">
+    <input class="auth-input" id="auth-password" type="password" autocomplete="current-password" placeholder="Password (min 6 chars)">
+    <button class="auth-btn" id="auth-submit" onclick="doAuth()">LOG IN</button>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
+<!-- ── App ── -->
 <div id="app">
   <header>
     <div>
       <div class="app-logo">GAIN<span>Z</span></div>
     </div>
-    <div class="header-date">
-      <strong id="hdr-day">Monday</strong>
-      <span id="hdr-date">01 Jan 2025</span>
+    <div class="app-user">
+      <div class="app-user-info">
+        <strong id="hdr-day">Monday</strong>
+        <span id="hdr-date">01 Jan 2025</span>
+      </div>
+      <button class="signout-btn" onclick="doSignOut()">Sign out</button>
     </div>
   </header>
 
+  <div class="sync-indicator" id="sync-indicator">
+    <div class="dot"></div><span id="sync-text">Synced</span>
+  </div>
+
   <div id="pages">
-    <!-- ── PAGE: Log ── -->
     <div class="page active" id="page-log">
       <div class="section-title">Choose muscle zone</div>
       <div class="zones-grid" id="zones-grid"></div>
-
       <div class="exercises-section" id="exercises-section">
         <div class="section-title" id="ex-section-label">Exercises</div>
         <div id="exercises-list"></div>
@@ -335,8 +418,6 @@
         </button>
       </div>
     </div>
-
-    <!-- ── PAGE: History ── -->
     <div class="page" id="page-history">
       <div class="section-title">Training history</div>
       <div class="history-filters" id="history-filters">
@@ -344,8 +425,6 @@
       </div>
       <div id="history-list"></div>
     </div>
-
-    <!-- ── PAGE: Stats ── -->
     <div class="page" id="page-stats">
       <div class="section-title">Overview</div>
       <div class="stats-grid" id="stats-grid"></div>
@@ -378,9 +457,60 @@
 
 <div id="toast"></div>
 
+<!-- ═════════════════════════════════════════════════════════════
+     FIREBASE + APP LOGIC
+     ═════════════════════════════════════════════════════════════ -->
+<script type="module">
+  // ── Firebase imports ────────────────────────────────────────
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, setPersistence, browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, deleteDoc, doc,
+    query, where, orderBy, onSnapshot, serverTimestamp,
+    enableIndexedDbPersistence
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // ── Firebase config (your gainz project) ────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyAoPEDcgzV4UWtSjoStMiNDAkwvy3c6YIE",
+    authDomain: "gainz-84e30.firebaseapp.com",
+    projectId: "gainz-84e30",
+    storageBucket: "gainz-84e30.firebasestorage.app",
+    messagingSenderId: "447692463742",
+    appId: "1:447692463742:web:28d5ca62b53ba97b6b022f",
+    measurementId: "G-Q31SH56W04"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const auth  = getAuth(fbApp);
+  const db    = getFirestore(fbApp);
+
+  // Offline persistence — works when you're at the gym with no signal
+  try {
+    await enableIndexedDbPersistence(db);
+  } catch (err) {
+    console.warn('Offline persistence unavailable:', err.code);
+  }
+
+  await setPersistence(auth, browserLocalPersistence);
+
+  // ── Expose to window so inline onclick handlers work ────────
+  window.__fb = { auth, db, collection, addDoc, query, where, orderBy,
+                  onSnapshot, serverTimestamp, doc, deleteDoc,
+                  signInWithEmailAndPassword, createUserWithEmailAndPassword,
+                  signOut, onAuthStateChanged };
+
+  // Trigger main app boot
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
+
 <script>
 // ═══════════════════════════════════════════════════════════
-//  DATA
+//  WORKOUT DATA + APP STATE
 // ═══════════════════════════════════════════════════════════
 const ZONES = {
   Chest:     { icon: '🫁', exercises: ['Pushups', 'Pec Dec', 'Chest Pullups', 'High Angle Press'] },
@@ -390,39 +520,179 @@ const ZONES = {
   Abs:       { icon: '🔥', exercises: ['Abs'] }
 };
 
-// ═══════════════════════════════════════════════════════════
-//  STORAGE
-// ═══════════════════════════════════════════════════════════
-function getHistory() {
-  try { return JSON.parse(localStorage.getItem('gainz_history') || '[]'); }
-  catch { return []; }
-}
-function saveHistory(h) { localStorage.setItem('gainz_history', JSON.stringify(h)); }
-
-function getLastRecord(zone, exercise) {
-  const h = getHistory().filter(e => e.zone === zone && e.exercise === exercise);
-  return h.length ? h[h.length - 1].value : null;
-}
+let selectedZone   = null;
+let historyFilter  = 'All';
+let historyCache   = [];      // mirror of Firestore data, sorted oldest→newest
+let unsubscribeHistory = null;
+let currentUser    = null;
+let authMode       = 'login'; // 'login' | 'signup'
 
 // ═══════════════════════════════════════════════════════════
-//  STATE
+//  BOOT — wait for Firebase to be ready
 // ═══════════════════════════════════════════════════════════
-let selectedZone = null;
-let historyFilter = 'All';
+window.addEventListener('firebase-ready', () => {
+  const { auth, onAuthStateChanged } = window.__fb;
 
-// ═══════════════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════════════
-function init() {
-  // Date header
+  // Header date
   const now = new Date();
   document.getElementById('hdr-day').textContent =
     now.toLocaleDateString('en-GB', { weekday: 'long' });
   document.getElementById('hdr-date').textContent =
     now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
-  // Build zones grid
+  // Auth listener
+  onAuthStateChanged(auth, (user) => {
+    document.getElementById('loading').style.display = 'none';
+    currentUser = user;
+
+    if (user) {
+      document.getElementById('auth-screen').classList.remove('visible');
+      document.getElementById('app').classList.add('visible');
+      buildZonesGrid();
+      buildHistoryFilters();
+      subscribeToHistory();
+      maybeMigrateLocalData();
+    } else {
+      if (unsubscribeHistory) { unsubscribeHistory(); unsubscribeHistory = null; }
+      historyCache = [];
+      document.getElementById('app').classList.remove('visible');
+      document.getElementById('auth-screen').classList.add('visible');
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  AUTH UI
+// ═══════════════════════════════════════════════════════════
+function setAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
+  document.getElementById('auth-submit').textContent = mode === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+  document.getElementById('auth-error').textContent = '';
+  document.getElementById('auth-password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
+}
+
+async function doAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pw    = document.getElementById('auth-password').value;
+  const err   = document.getElementById('auth-error');
+  const btn   = document.getElementById('auth-submit');
+
+  err.textContent = '';
+  if (!email || !pw) { err.textContent = 'Enter both email and password'; return; }
+  if (pw.length < 6) { err.textContent = 'Password must be at least 6 characters'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+
+  const { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } = window.__fb;
+
+  try {
+    if (authMode === 'login') {
+      await signInWithEmailAndPassword(auth, email, pw);
+    } else {
+      await createUserWithEmailAndPassword(auth, email, pw);
+    }
+  } catch (e) {
+    err.textContent = friendlyError(e.code);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = authMode === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+  }
+}
+
+function friendlyError(code) {
+  const m = {
+    'auth/invalid-email':       'Invalid email address',
+    'auth/email-already-in-use':'Email already registered — try logging in',
+    'auth/wrong-password':      'Wrong password',
+    'auth/user-not-found':      'No account with that email',
+    'auth/weak-password':       'Password too weak (6+ characters)',
+    'auth/network-request-failed': 'Network error — check your connection',
+    'auth/invalid-credential':  'Wrong email or password'
+  };
+  return m[code] || 'Something went wrong — try again';
+}
+
+async function doSignOut() {
+  const { auth, signOut } = window.__fb;
+  await signOut(auth);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FIRESTORE SYNC
+// ═══════════════════════════════════════════════════════════
+function subscribeToHistory() {
+  if (!currentUser) return;
+  const { db, collection, query, orderBy, onSnapshot } = window.__fb;
+
+  showSync('Syncing...');
+
+  const q = query(
+    collection(db, 'users', currentUser.uid, 'entries'),
+    orderBy('ts', 'asc')
+  );
+  unsubscribeHistory = onSnapshot(q,
+    (snap) => {
+      historyCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      hideSync();
+      // Refresh the visible page
+      const active = document.querySelector('.page.active');
+      if (active) {
+        if (active.id === 'page-log' && selectedZone)   renderExercises(selectedZone);
+        if (active.id === 'page-history')               renderHistory();
+        if (active.id === 'page-stats')                 renderStats();
+      }
+    },
+    (err) => {
+      console.error('Sync error:', err);
+      showSync('Offline', '#f5c842');
+    }
+  );
+}
+
+async function addEntry(date, zone, exercise, value) {
+  if (!currentUser) return;
+  const { db, collection, addDoc, serverTimestamp } = window.__fb;
+  await addDoc(collection(db, 'users', currentUser.uid, 'entries'), {
+    date, zone, exercise, value,
+    ts: serverTimestamp()
+  });
+}
+
+function getLastRecord(zone, exercise) {
+  const matches = historyCache.filter(e => e.zone === zone && e.exercise === exercise);
+  return matches.length ? matches[matches.length - 1].value : null;
+}
+
+// One-time migration: if Firestore is empty and localStorage has entries, push them up
+async function maybeMigrateLocalData() {
+  // Wait a bit for the first onSnapshot to complete
+  setTimeout(async () => {
+    if (historyCache.length > 0) return;
+    let local;
+    try { local = JSON.parse(localStorage.getItem('gainz_history') || '[]'); }
+    catch { return; }
+    if (!Array.isArray(local) || local.length === 0) return;
+
+    showToast(`Importing ${local.length} entries from this device...`, '#4f8ef7');
+    for (const e of local) {
+      try {
+        await addEntry(e.date, e.zone, e.exercise, e.value);
+      } catch (err) { console.error('Migrate err:', err); }
+    }
+    localStorage.removeItem('gainz_history');
+    showToast(`✅ Imported ${local.length} entries`);
+  }, 1500);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UI BUILDERS
+// ═══════════════════════════════════════════════════════════
+function buildZonesGrid() {
   const grid = document.getElementById('zones-grid');
+  if (grid.children.length) return;
   Object.entries(ZONES).forEach(([name, data]) => {
     const card = document.createElement('div');
     card.className = 'zone-card';
@@ -436,9 +706,11 @@ function init() {
     card.onclick = () => selectZone(name);
     grid.appendChild(card);
   });
+}
 
-  // Build history filters
+function buildHistoryFilters() {
   const filters = document.getElementById('history-filters');
+  if (filters.children.length > 1) return;
   Object.keys(ZONES).forEach(zone => {
     const chip = document.createElement('div');
     chip.className = 'filter-chip';
@@ -461,9 +733,6 @@ function showPage(name, btn) {
   if (name === 'stats')   renderStats();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  ZONE SELECTION
-// ═══════════════════════════════════════════════════════════
 function selectZone(zone) {
   selectedZone = zone;
   document.querySelectorAll('.zone-card').forEach(c => c.classList.toggle('selected', c.dataset.zone === zone));
@@ -476,10 +745,14 @@ function selectZone(zone) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  EXERCISES
+//  EXERCISES (log page)
 // ═══════════════════════════════════════════════════════════
 function renderExercises(zone) {
   const list = document.getElementById('exercises-list');
+  // preserve current input values during re-render
+  const current = {};
+  list.querySelectorAll('input').forEach(i => { current[i.id] = i.value; });
+
   list.innerHTML = '';
   ZONES[zone].exercises.forEach((ex, i) => {
     const last = getLastRecord(zone, ex);
@@ -490,57 +763,54 @@ function renderExercises(zone) {
         <div class="ex-name">${ex}</div>
         <div class="ex-last ${last ? '' : 'empty'}">${last || 'No record yet'}</div>
       </div>
-      <input
-        class="ex-input"
-        id="input-${i}"
-        type="text"
-        inputmode="text"
-        placeholder="e.g. 80kg 3×10"
-        autocomplete="off"
-        spellcheck="false"
-      >
+      <input class="ex-input" id="input-${i}" type="text" inputmode="text"
+             placeholder="e.g. 80kg 3×10" autocomplete="off" spellcheck="false"
+             value="${current['input-' + i] || ''}">
     `;
     list.appendChild(card);
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-//  LOG WORKOUT
+//  LOG WORKOUT (writes to Firestore)
 // ═══════════════════════════════════════════════════════════
-function logWorkout() {
-  if (!selectedZone) return;
+async function logWorkout() {
+  if (!selectedZone || !currentUser) return;
 
   const exercises = ZONES[selectedZone].exercises;
   const today = new Date().toLocaleDateString('en-GB');
-  const history = getHistory();
   let logged = 0;
 
+  showSync('Saving...');
+  const writes = [];
   exercises.forEach((ex, i) => {
     const input = document.getElementById('input-' + i);
     const val = input ? input.value.trim() : '';
     if (val) {
-      history.push({ date: today, zone: selectedZone, exercise: ex, value: val });
+      writes.push(addEntry(today, selectedZone, ex, val));
       logged++;
     }
   });
 
   if (logged === 0) {
+    hideSync();
     showToast('Fill in at least one exercise! 📝', '#ff3c5f');
     return;
   }
 
-  saveHistory(history);
-
-  // Clear inputs
-  exercises.forEach((_, i) => {
-    const input = document.getElementById('input-' + i);
-    if (input) input.value = '';
-  });
-
-  // Refresh last records
-  renderExercises(selectedZone);
-
-  showToast(`✅ ${logged} exercise${logged > 1 ? 's' : ''} logged!`);
+  try {
+    await Promise.all(writes);
+    exercises.forEach((_, i) => {
+      const input = document.getElementById('input-' + i);
+      if (input) input.value = '';
+    });
+    hideSync();
+    showToast(`✅ ${logged} exercise${logged > 1 ? 's' : ''} logged!`);
+  } catch (e) {
+    console.error(e);
+    hideSync();
+    showToast('Saved locally, will sync when online', '#f5c842');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -555,7 +825,7 @@ function filterHistory(zone, chipEl) {
 
 function renderHistory() {
   const list = document.getElementById('history-list');
-  let data = getHistory().slice().reverse();
+  let data = historyCache.slice().reverse();
   if (historyFilter !== 'All') data = data.filter(e => e.zone === historyFilter);
 
   if (!data.length) {
@@ -566,12 +836,8 @@ function renderHistory() {
     return;
   }
 
-  // Group by date
   const grouped = {};
-  data.forEach(e => {
-    if (!grouped[e.date]) grouped[e.date] = [];
-    grouped[e.date].push(e);
-  });
+  data.forEach(e => { if (!grouped[e.date]) grouped[e.date] = []; grouped[e.date].push(e); });
 
   list.innerHTML = '';
   Object.entries(grouped).forEach(([date, entries], gi) => {
@@ -606,7 +872,7 @@ function formatDateLabel(dateStr) {
   const diff = Math.round((today - date) / 86400000);
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Yesterday';
-  if (diff < 7) return date.toLocaleDateString('en-GB', { weekday: 'long' });
+  if (diff < 7)   return date.toLocaleDateString('en-GB', { weekday: 'long' });
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
@@ -614,46 +880,28 @@ function formatDateLabel(dateStr) {
 //  STATS
 // ═══════════════════════════════════════════════════════════
 function renderStats() {
-  const history = getHistory();
-  const totalSessions = new Set(history.map(e => e.date + e.zone)).size;
-  const totalEntries  = history.length;
-  const streak        = calcStreak(history);
-  const topZone       = calcTopZone(history);
+  const totalSessions = new Set(historyCache.map(e => e.date + e.zone)).size;
+  const totalEntries  = historyCache.length;
+  const streak        = calcStreak(historyCache);
+  const topZone       = calcTopZone(historyCache);
 
   document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card">
-      <div class="stat-value">${totalSessions}</div>
-      <div class="stat-label">Sessions</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${streak}</div>
-      <div class="stat-label">Day streak 🔥</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${totalEntries}</div>
-      <div class="stat-label">Sets logged</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${topZone || '—'}</div>
-      <div class="stat-label">Fav zone</div>
-    </div>
+    <div class="stat-card"><div class="stat-value">${totalSessions}</div><div class="stat-label">Sessions</div></div>
+    <div class="stat-card"><div class="stat-value">${streak}</div><div class="stat-label">Day streak 🔥</div></div>
+    <div class="stat-card"><div class="stat-value">${totalEntries}</div><div class="stat-label">Sets logged</div></div>
+    <div class="stat-card"><div class="stat-value">${topZone || '—'}</div><div class="stat-label">Fav zone</div></div>
   `;
 
-  // Personal bests (last logged value per exercise)
   const pb = document.getElementById('pb-section');
   const bests = {};
-  history.forEach(e => { bests[e.exercise] = e.value; });
+  historyCache.forEach(e => { bests[e.exercise] = e.value; });
 
   if (!Object.keys(bests).length) {
     pb.innerHTML = '<div class="empty-state" style="padding:30px 0"><p>Log your first workout to see personal bests.</p></div>';
     return;
   }
-
   pb.innerHTML = Object.entries(bests).map(([ex, val]) => `
-    <div class="pb-row">
-      <div class="pb-ex">${ex}</div>
-      <div class="pb-val">${val}</div>
-    </div>
+    <div class="pb-row"><div class="pb-ex">${ex}</div><div class="pb-val">${val}</div></div>
   `).join('');
 }
 
@@ -679,21 +927,34 @@ function calcTopZone(history) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  TOAST
+//  TOAST + SYNC INDICATOR
 // ═══════════════════════════════════════════════════════════
 function showToast(msg, color = '#39d98a') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.background = color;
-  t.style.color = color === '#39d98a' ? '#0a1f14' : 'white';
+  t.style.color = (color === '#39d98a') ? '#0a1f14' : 'white';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-// ═══════════════════════════════════════════════════════════
-//  START
-// ═══════════════════════════════════════════════════════════
-init();
+function showSync(text = 'Syncing...', color = '#39d98a') {
+  const ind = document.getElementById('sync-indicator');
+  document.getElementById('sync-text').textContent = text;
+  ind.querySelector('.dot').style.background = color;
+  ind.classList.add('show');
+}
+function hideSync() {
+  setTimeout(() => document.getElementById('sync-indicator').classList.remove('show'), 600);
+}
+
+// expose for inline handlers
+window.setAuthTab  = setAuthTab;
+window.doAuth      = doAuth;
+window.doSignOut   = doSignOut;
+window.showPage    = showPage;
+window.logWorkout  = logWorkout;
+window.filterHistory = filterHistory;
 </script>
 </body>
 </html>
