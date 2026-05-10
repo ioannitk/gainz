@@ -145,13 +145,47 @@
     position: relative; overflow: hidden; }
   .zone-card:active { transform: scale(0.97); }
   .zone-card.selected { border-color: var(--red); background: linear-gradient(135deg, #2a1020 0%, #1e1e30 100%); }
+
+  /* Completion states (today) */
+  .zone-card.complete {
+    border-color: var(--green);
+    background: linear-gradient(135deg, #0d2a1a 0%, #1e1e30 100%);
+  }
+  .zone-card.complete .zone-name { color: var(--green); }
+  .zone-card.complete .zone-count { color: var(--green); }
+  .zone-card.complete.selected {
+    border-color: var(--green);
+    box-shadow: 0 0 0 1.5px var(--green);
+  }
+  .zone-card.incomplete:not(.selected) {
+    animation: gentleRedPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes gentleRedPulse {
+    0%, 100% {
+      border-color: var(--border);
+      box-shadow: 0 0 0 0 rgba(255, 60, 95, 0);
+    }
+    50% {
+      border-color: rgba(255, 60, 95, 0.55);
+      box-shadow: 0 0 0 3px rgba(255, 60, 95, 0.10);
+    }
+  }
+
   .zone-card .zone-icon { font-size: 28px; line-height: 1; }
   .zone-card .zone-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; line-height: 1; color: var(--text); }
   .zone-card .zone-count { font-size: 11px; color: var(--muted); font-weight: 500; }
   .zone-card.selected .zone-count { color: var(--red); }
   .zone-card .zone-dot { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%;
     background: var(--red); opacity: 0; transition: opacity 0.2s; }
-  .zone-card.selected .zone-dot { opacity: 1; }
+  .zone-card.selected:not(.complete) .zone-dot { opacity: 1; }
+  .zone-card .zone-check {
+    position: absolute; top: 10px; right: 10px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--green); color: #0a1f14;
+    display: none; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .zone-card.complete .zone-check { display: flex; }
 
   .exercises-section { display: none; }
   .exercises-section.visible { display: block; }
@@ -273,9 +307,65 @@
     border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; }
   .sz-header { padding: 14px 16px; display: flex; align-items: center; gap: 10px;
     border-bottom: 1px solid var(--border); background: var(--bg2); }
-  .sz-icon { font-size: 22px; }
-  .sz-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1.5px; flex: 1; }
-  .sz-count { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .sz-icon-btn {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); width: 40px; height: 40px;
+    font-size: 22px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s;
+  }
+  .sz-icon-btn:active { border-color: var(--red); }
+  .sz-name-input {
+    flex: 1; background: transparent;
+    border: 1.5px solid transparent; border-radius: var(--radius-sm);
+    color: var(--text); font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 1.5px;
+    padding: 8px 10px; outline: none;
+    user-select: text; transition: border-color 0.2s, background 0.2s;
+    min-width: 0;
+  }
+  .sz-name-input:focus { border-color: var(--red); background: var(--input-bg); }
+  .sz-count { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
+  .sz-zone-delete {
+    background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+    width: 32px; height: 32px; border-radius: var(--radius-sm); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 13px; transition: color 0.2s, border-color 0.2s;
+  }
+  .sz-zone-delete:active { color: var(--red); border-color: var(--red); }
+
+  .add-zone-btn {
+    width: 100%; margin-top: 8px; margin-bottom: 8px;
+    background: var(--card); border: 1.5px dashed var(--border);
+    color: var(--green); padding: 16px;
+    border-radius: var(--radius); cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px; letter-spacing: 2px;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .add-zone-btn:active { border-color: var(--green); transform: scale(0.98); }
+
+  .add-zone-form {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .add-zone-form.visible { display: block; }
+  .add-zone-form-row {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 10px;
+  }
+  .add-zone-form-row:last-of-type { margin-bottom: 12px; }
+  .add-zone-actions { display: flex; gap: 8px; }
+  .add-zone-actions button { flex: 1; padding: 10px; border-radius: var(--radius-sm);
+    font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 2px;
+    cursor: pointer; border: 1px solid var(--border); }
+  .btn-save { background: var(--red); color: white; border-color: var(--red); }
+  .btn-save:active { background: var(--red-dim); }
+  .btn-cancel { background: var(--card); color: var(--muted); }
+  .btn-cancel:active { background: var(--bg2); }
+
   .sz-body { padding: 8px 12px 12px; }
   .sz-ex-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
   .sz-ex-input { flex: 1; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
@@ -467,16 +557,16 @@
 </script>
 
 <script>
-const ZONE_ICONS = { Chest: '🫁', Arms: '💪', Shoulders: '🏔️', Back: '🦅', Abs: '🔥' };
-const DEFAULT_EXERCISES = {
-  Chest:     ['Pushups', 'Pec Dec', 'Chest Pullups', 'High Angle Press'],
-  Arms:      ['Triceps Push Rope', 'Triceps Push Handles', 'Biceps Rope', 'Biceps Handle'],
-  Shoulders: ['Lats', 'Shoulder Press', 'Rotations', 'Dumbbell Rotations'],
-  Back:      ['Pullups', 'Rows', 'Flags', 'Pulldowns'],
-  Abs:       ['Abs']
-};
+const DEFAULT_ICONS = { Chest: '🫁', Arms: '💪', Shoulders: '🏔️', Back: '🦅', Abs: '🔥' };
+const DEFAULT_ZONES = [
+  { name: 'Chest',     icon: '🫁',   exercises: ['Pushups', 'Pec Dec', 'Chest Pullups', 'High Angle Press'] },
+  { name: 'Arms',      icon: '💪',   exercises: ['Triceps Push Rope', 'Triceps Push Handles', 'Biceps Rope', 'Biceps Handle'] },
+  { name: 'Shoulders', icon: '🏔️',  exercises: ['Lats', 'Shoulder Press', 'Rotations', 'Dumbbell Rotations'] },
+  { name: 'Back',      icon: '🦅',   exercises: ['Pullups', 'Rows', 'Flags', 'Pulldowns'] },
+  { name: 'Abs',       icon: '🔥',   exercises: ['Abs'] }
+];
 
-let zonesConfig    = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+let zonesConfig    = JSON.parse(JSON.stringify(DEFAULT_ZONES));
 let selectedZone   = null;
 let historyFilter  = 'All';
 let progressZoneFilter = 'All';
@@ -486,6 +576,12 @@ let unsubscribeConfig  = null;
 let currentUser    = null;
 let authMode       = 'login';
 let progressChart  = null;
+
+// ── Zone helpers ──
+function findZone(name) { return zonesConfig.find(z => z.name === name); }
+function zoneNames()    { return zonesConfig.map(z => z.name); }
+function zoneIcon(name) { return findZone(name)?.icon || '🏋️'; }
+function zoneExercises(name) { return findZone(name)?.exercises || []; }
 
 window.addEventListener('firebase-ready', () => {
   const { auth, onAuthStateChanged } = window.__fb;
@@ -506,7 +602,7 @@ window.addEventListener('firebase-ready', () => {
       if (unsubscribeHistory) { unsubscribeHistory(); unsubscribeHistory = null; }
       if (unsubscribeConfig)  { unsubscribeConfig();  unsubscribeConfig  = null; }
       historyCache = [];
-      zonesConfig = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+      zonesConfig = JSON.parse(JSON.stringify(DEFAULT_ZONES));
       document.getElementById('app').classList.remove('visible');
       document.getElementById('auth-screen').classList.add('visible');
     }
@@ -557,32 +653,60 @@ function friendlyError(code) {
 async function doSignOut() { await window.__fb.signOut(window.__fb.auth); }
 
 // ── Config sync ──
+function normalizeConfigData(data) {
+  // New format: { version: 2, zones: [{name, icon, exercises}, ...] }
+  if (data && data.version === 2 && Array.isArray(data.zones)) {
+    return data.zones.map(z => ({
+      name: String(z.name || ''),
+      icon: String(z.icon || '🏋️'),
+      exercises: Array.isArray(z.exercises) ? z.exercises.map(String) : []
+    })).filter(z => z.name);
+  }
+  // Old format: top-level keys are zone names with arrays of exercises
+  const zones = [];
+  // Preserve default order for known zones
+  DEFAULT_ZONES.forEach(d => {
+    if (data && Array.isArray(data[d.name])) {
+      zones.push({ name: d.name, icon: DEFAULT_ICONS[d.name] || '🏋️', exercises: data[d.name] });
+    }
+  });
+  // Append any custom zones from old format
+  if (data) {
+    Object.keys(data).forEach(name => {
+      if (Array.isArray(data[name]) && !DEFAULT_ICONS[name]) {
+        zones.push({ name, icon: '🏋️', exercises: data[name] });
+      }
+    });
+  }
+  return zones.length ? zones : JSON.parse(JSON.stringify(DEFAULT_ZONES));
+}
+
 function subscribeToConfig() {
   if (!currentUser) return;
   const { db, doc, onSnapshot, setDoc } = window.__fb;
   const ref = doc(db, 'users', currentUser.uid, 'config', 'zones');
   unsubscribeConfig = onSnapshot(ref, async (snap) => {
     if (!snap.exists()) {
-      try { await setDoc(ref, DEFAULT_EXERCISES); } catch(e) { console.error(e); }
-      zonesConfig = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
+      try { await setDoc(ref, { version: 2, zones: DEFAULT_ZONES }); } catch(e) { console.error(e); }
+      zonesConfig = JSON.parse(JSON.stringify(DEFAULT_ZONES));
     } else {
-      const data = snap.data();
-      const merged = JSON.parse(JSON.stringify(DEFAULT_EXERCISES));
-      Object.keys(merged).forEach(z => {
-        if (Array.isArray(data[z])) merged[z] = data[z];
-      });
-      zonesConfig = merged;
+      zonesConfig = normalizeConfigData(snap.data());
     }
     buildZonesGrid();
     buildHistoryFilters();
     buildProgressFilters();
     refreshActivePage();
+    // Re-render settings if open
+    if (document.getElementById('settings-modal').classList.contains('visible')) {
+      renderSettings();
+    }
   });
 }
 async function saveConfig() {
   if (!currentUser) return;
   const { db, doc, setDoc } = window.__fb;
-  await setDoc(doc(db, 'users', currentUser.uid, 'config', 'zones'), zonesConfig);
+  await setDoc(doc(db, 'users', currentUser.uid, 'config', 'zones'),
+    { version: 2, zones: zonesConfig });
 }
 
 // ── History sync ──
@@ -606,7 +730,10 @@ function subscribeToHistory() {
 function refreshActivePage() {
   const active = document.querySelector('.page.active');
   if (!active) return;
-  if (active.id === 'page-log' && selectedZone) renderExercises(selectedZone);
+  if (active.id === 'page-log') {
+    buildZonesGrid();
+    if (selectedZone) renderExercises(selectedZone);
+  }
   if (active.id === 'page-history')             renderHistory();
   if (active.id === 'page-stats')               renderStats();
   if (active.id === 'page-progress')            renderProgressList();
@@ -632,6 +759,24 @@ async function renameInHistory(zone, oldName, newName) {
   snap.forEach(d => batch.update(d.ref, { exercise: newName }));
   await batch.commit();
 }
+
+async function renameZoneInHistory(oldZoneName, newZoneName) {
+  if (!currentUser || oldZoneName === newZoneName) return;
+  const { db, collection, query, where, getDocs, writeBatch } = window.__fb;
+  const q = query(
+    collection(db, 'users', currentUser.uid, 'entries'),
+    where('zone', '==', oldZoneName)
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) return;
+  // Firestore batches max 500 operations
+  const docs = snap.docs;
+  for (let i = 0; i < docs.length; i += 500) {
+    const batch = writeBatch(db);
+    docs.slice(i, i + 500).forEach(d => batch.update(d.ref, { zone: newZoneName }));
+    await batch.commit();
+  }
+}
 function getLastRecord(zone, exercise) {
   const m = historyCache.filter(e => e.zone === zone && e.exercise === exercise);
   return m.length ? m[m.length - 1].value : null;
@@ -652,19 +797,45 @@ async function maybeMigrateLocalData() {
 }
 
 // ── UI builders ──
+function todayKey() {
+  return new Date().toLocaleDateString('en-GB');
+}
+
+function getZoneStatus(zoneName) {
+  const exs = zoneExercises(zoneName);
+  if (exs.length === 0) return 'neutral';
+  const today = todayKey();
+  const todayLogged = new Set(
+    historyCache
+      .filter(e => e.zone === zoneName && e.date === today)
+      .map(e => e.exercise)
+  );
+  const done = exs.filter(ex => todayLogged.has(ex)).length;
+  if (done === exs.length) return 'complete';
+  return 'incomplete';
+}
+
 function buildZonesGrid() {
   const grid = document.getElementById('zones-grid');
   grid.innerHTML = '';
-  Object.entries(zonesConfig).forEach(([name, exs]) => {
+  if (zonesConfig.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1" class="empty-state"><p>No muscle groups yet.<br>Open Settings (⚙) to add one.</p></div>`;
+    return;
+  }
+  zonesConfig.forEach(({ name, icon, exercises }) => {
     const card = document.createElement('div');
     card.className = 'zone-card';
     if (selectedZone === name) card.classList.add('selected');
+    const status = getZoneStatus(name);
+    if (status === 'complete')   card.classList.add('complete');
+    if (status === 'incomplete') card.classList.add('incomplete');
     card.dataset.zone = name;
     card.innerHTML = `
       <div class="zone-dot"></div>
-      <div class="zone-icon">${ZONE_ICONS[name] || '🏋️'}</div>
-      <div class="zone-name">${name}</div>
-      <div class="zone-count">${exs.length} exercise${exs.length === 1 ? '' : 's'}</div>
+      <div class="zone-check">✓</div>
+      <div class="zone-icon">${escapeHtml(icon || '🏋️')}</div>
+      <div class="zone-name">${escapeHtml(name)}</div>
+      <div class="zone-count">${exercises.length} exercise${exercises.length === 1 ? '' : 's'}</div>
     `;
     card.onclick = () => selectZone(name);
     grid.appendChild(card);
@@ -678,7 +849,7 @@ function buildHistoryFilters() {
   all.textContent = 'All';
   all.onclick = function() { filterHistory('All', this); };
   f.appendChild(all);
-  Object.keys(zonesConfig).forEach(zone => {
+  zoneNames().forEach(zone => {
     const chip = document.createElement('div');
     chip.className = 'filter-chip' + (historyFilter === zone ? ' active' : '');
     chip.textContent = zone;
@@ -694,7 +865,7 @@ function buildProgressFilters() {
   all.textContent = 'All';
   all.onclick = function() { filterProgress('All', this); };
   f.appendChild(all);
-  Object.keys(zonesConfig).forEach(zone => {
+  zoneNames().forEach(zone => {
     const chip = document.createElement('div');
     chip.className = 'filter-chip' + (progressZoneFilter === zone ? ' active' : '');
     chip.textContent = zone;
@@ -728,7 +899,7 @@ function renderExercises(zone) {
   const current = {};
   list.querySelectorAll('input').forEach(i => { current[i.id] = i.value; });
   list.innerHTML = '';
-  const exs = zonesConfig[zone] || [];
+  const exs = zoneExercises(zone);
   if (exs.length === 0) {
     list.innerHTML = `<div class="empty-state"><p>No exercises in this zone yet.<br>Open Settings to add some.</p></div>`;
     return;
@@ -752,7 +923,7 @@ function renderExercises(zone) {
 
 async function logWorkout() {
   if (!selectedZone || !currentUser) return;
-  const exs = zonesConfig[selectedZone] || [];
+  const exs = zoneExercises(selectedZone);
   const today = new Date().toLocaleDateString('en-GB');
   let logged = 0;
   showSync('Saving...');
@@ -886,10 +1057,10 @@ function filterProgress(zone, chipEl) {
 }
 function renderProgressList() {
   const list = document.getElementById('progress-list');
-  const showZones = progressZoneFilter === 'All' ? Object.keys(zonesConfig) : [progressZoneFilter];
+  const showZones = progressZoneFilter === 'All' ? zoneNames() : [progressZoneFilter];
   const items = [];
   showZones.forEach(zone => {
-    (zonesConfig[zone] || []).forEach(ex => {
+    zoneExercises(zone).forEach(ex => {
       const entries = historyCache.filter(e => e.zone === zone && e.exercise === ex);
       const weights = entries.map(e => extractWeight(e.value)).filter(n => n !== null);
       let trend = 'flat', label = '—';
@@ -1027,6 +1198,9 @@ function formatNum(n) {
 }
 
 // ── Settings ──
+const ICON_CHOICES = ['🫁','💪','🏔️','🦅','🔥','🦵','🏃','🧘','🤸','🏋️','⚡','🎯','🥊','💥','🦴','🍑','💧','🧠'];
+let zonePendingDelete = null;
+
 function openSettings() {
   document.getElementById('settings-modal').classList.add('visible');
   renderSettings();
@@ -1034,52 +1208,115 @@ function openSettings() {
 function closeSettings() {
   document.getElementById('settings-modal').classList.remove('visible');
 }
+
 function renderSettings() {
   const body = document.getElementById('settings-zones');
   body.innerHTML = '';
-  Object.keys(zonesConfig).forEach(zone => {
-    const exs = zonesConfig[zone];
+
+  zonesConfig.forEach((zone, zIdx) => {
     const zd = document.createElement('div');
     zd.className = 'settings-zone';
     zd.innerHTML = `
       <div class="sz-header">
-        <div class="sz-icon">${ZONE_ICONS[zone]}</div>
-        <div class="sz-name">${zone}</div>
-        <div class="sz-count">${exs.length} ex</div>
+        <button class="sz-icon-btn" onclick="cycleZoneIcon(${zIdx})" title="Tap to change icon">${escapeHtml(zone.icon)}</button>
+        <input class="sz-name-input" type="text" value="${escapeHtml(zone.name)}"
+               data-zidx="${zIdx}" data-original="${escapeHtml(zone.name)}">
+        <div class="sz-count">${zone.exercises.length} ex</div>
+        <button class="sz-zone-delete" onclick="deleteZone(${zIdx})" title="Delete zone">🗑</button>
       </div>
-      <div class="sz-body" id="sz-body-${zone}"></div>
+      <div class="sz-body" id="sz-body-${zIdx}"></div>
     `;
     body.appendChild(zd);
-    const sub = document.getElementById(`sz-body-${zone}`);
-    exs.forEach((ex, idx) => {
+
+    const sub = document.getElementById(`sz-body-${zIdx}`);
+    zone.exercises.forEach((ex, eIdx) => {
       const row = document.createElement('div');
       row.className = 'sz-ex-row';
       row.innerHTML = `
         <input class="sz-ex-input" type="text" value="${escapeHtml(ex)}"
-               data-zone="${escapeHtml(zone)}" data-idx="${idx}" data-original="${escapeHtml(ex)}">
-        <button class="sz-action-btn delete" onclick="deleteExercise('${escapeAttr(zone)}', ${idx})">🗑</button>
+               data-zidx="${zIdx}" data-eidx="${eIdx}" data-original="${escapeHtml(ex)}">
+        <button class="sz-action-btn delete" onclick="deleteExercise(${zIdx}, ${eIdx})">🗑</button>
       `;
       sub.appendChild(row);
     });
     const addBtn = document.createElement('button');
     addBtn.className = 'sz-action-btn add';
     addBtn.textContent = '+ Add exercise';
-    addBtn.onclick = () => addExercise(zone);
+    addBtn.onclick = () => addExercise(zIdx);
     sub.appendChild(addBtn);
   });
-  document.querySelectorAll('.sz-ex-input').forEach(inp => {
+
+  // "Add new muscle group" button
+  const addZoneBtn = document.createElement('button');
+  addZoneBtn.className = 'add-zone-btn';
+  addZoneBtn.textContent = '+ Add Muscle Group';
+  addZoneBtn.onclick = showAddZoneForm;
+  body.appendChild(addZoneBtn);
+
+  // Add-zone form (hidden by default)
+  const form = document.createElement('div');
+  form.className = 'add-zone-form';
+  form.id = 'add-zone-form';
+  form.innerHTML = `
+    <div class="add-zone-form-row">
+      <button class="sz-icon-btn" id="new-zone-icon-btn" onclick="cycleNewZoneIcon()">🏋️</button>
+      <input class="sz-name-input" id="new-zone-name" type="text" placeholder="Group name (e.g. Legs)" style="border-color: var(--border); background: var(--input-bg)">
+    </div>
+    <div class="add-zone-actions">
+      <button class="btn-cancel" onclick="hideAddZoneForm()">Cancel</button>
+      <button class="btn-save" onclick="saveNewZone()">Add</button>
+    </div>
+  `;
+  body.appendChild(form);
+
+  // Zone-name blur handler
+  document.querySelectorAll('.sz-name-input').forEach(inp => {
     inp.addEventListener('blur', async (e) => {
-      const zone = e.target.dataset.zone;
-      const idx  = parseInt(e.target.dataset.idx, 10);
+      const zIdx = parseInt(e.target.dataset.zidx, 10);
       const orig = e.target.dataset.original;
       const newName = e.target.value.trim();
       if (!newName) { e.target.value = orig; return; }
       if (newName === orig) return;
-      zonesConfig[zone][idx] = newName;
+      // prevent duplicates
+      if (zonesConfig.some((z, i) => i !== zIdx && z.name === newName)) {
+        showToast(`"${newName}" already exists`, '#ff3c5f');
+        e.target.value = orig;
+        return;
+      }
+      zonesConfig[zIdx].name = newName;
+      e.target.dataset.original = newName;
+      // Update selected zone reference if it was renamed
+      if (selectedZone === orig) selectedZone = newName;
+      if (historyFilter === orig) historyFilter = newName;
+      if (progressZoneFilter === orig) progressZoneFilter = newName;
+      showSync('Saving...');
+      try {
+        await Promise.all([ saveConfig(), renameZoneInHistory(orig, newName) ]);
+        hideSync();
+        showToast(`Renamed to "${newName}"`);
+      } catch (err) {
+        console.error(err);
+        hideSync();
+        showToast('Save failed', '#ff3c5f');
+      }
+    });
+  });
+
+  // Exercise blur handler
+  document.querySelectorAll('.sz-ex-input').forEach(inp => {
+    inp.addEventListener('blur', async (e) => {
+      const zIdx = parseInt(e.target.dataset.zidx, 10);
+      const eIdx = parseInt(e.target.dataset.eidx, 10);
+      const orig = e.target.dataset.original;
+      const newName = e.target.value.trim();
+      if (!newName) { e.target.value = orig; return; }
+      if (newName === orig) return;
+      const zoneName = zonesConfig[zIdx].name;
+      zonesConfig[zIdx].exercises[eIdx] = newName;
       e.target.dataset.original = newName;
       showSync('Saving...');
       try {
-        await Promise.all([ saveConfig(), renameInHistory(zone, orig, newName) ]);
+        await Promise.all([ saveConfig(), renameInHistory(zoneName, orig, newName) ]);
         hideSync();
         showToast(`Renamed to "${newName}"`);
       } catch (err) {
@@ -1090,22 +1327,99 @@ function renderSettings() {
     });
   });
 }
-async function addExercise(zone) {
-  const name = prompt(`New exercise name for ${zone}:`);
-  if (!name || !name.trim()) return;
-  zonesConfig[zone].push(name.trim());
+
+async function cycleZoneIcon(zIdx) {
+  const cur = zonesConfig[zIdx].icon;
+  const idx = ICON_CHOICES.indexOf(cur);
+  const next = ICON_CHOICES[(idx + 1) % ICON_CHOICES.length];
+  zonesConfig[zIdx].icon = next;
   showSync('Saving...');
   try {
     await saveConfig();
     hideSync();
-    showToast(`Added "${name.trim()}"`);
+  } catch (err) { hideSync(); }
+  renderSettings();
+}
+
+let newZoneIconIdx = 9; // 🏋️
+function cycleNewZoneIcon() {
+  newZoneIconIdx = (newZoneIconIdx + 1) % ICON_CHOICES.length;
+  document.getElementById('new-zone-icon-btn').textContent = ICON_CHOICES[newZoneIconIdx];
+}
+function showAddZoneForm() {
+  document.getElementById('add-zone-form').classList.add('visible');
+  const inp = document.getElementById('new-zone-name');
+  inp.value = '';
+  setTimeout(() => inp.focus(), 50);
+}
+function hideAddZoneForm() {
+  document.getElementById('add-zone-form').classList.remove('visible');
+}
+async function saveNewZone() {
+  const name = document.getElementById('new-zone-name').value.trim();
+  if (!name) { showToast('Enter a group name', '#ff3c5f'); return; }
+  if (zonesConfig.some(z => z.name === name)) {
+    showToast(`"${name}" already exists`, '#ff3c5f');
+    return;
+  }
+  zonesConfig.push({ name, icon: ICON_CHOICES[newZoneIconIdx], exercises: [] });
+  showSync('Saving...');
+  try {
+    await saveConfig();
+    hideSync();
+    showToast(`Added "${name}"`);
+    hideAddZoneForm();
     renderSettings();
   } catch (err) { hideSync(); showToast('Save failed', '#ff3c5f'); }
 }
-async function deleteExercise(zone, idx) {
-  const name = zonesConfig[zone][idx];
-  if (!confirm(`Remove "${name}" from ${zone}?\n\nYour past history will keep these entries.`)) return;
-  zonesConfig[zone].splice(idx, 1);
+
+async function deleteZone(zIdx) {
+  const zone = zonesConfig[zIdx];
+  const name = zone.name;
+  const exCount = zone.exercises.length;
+  if (!confirm(
+    `Delete muscle group "${name}"?\n\n` +
+    `This removes the group and all ${exCount} of its exercise${exCount === 1 ? '' : 's'} from the tracker.\n\n` +
+    `Past history entries are preserved.`
+  )) return;
+
+  zonesConfig.splice(zIdx, 1);
+  if (selectedZone === name) selectedZone = null;
+  if (historyFilter === name) historyFilter = 'All';
+  if (progressZoneFilter === name) progressZoneFilter = 'All';
+
+  showSync('Saving...');
+  try {
+    await saveConfig();
+    hideSync();
+    showToast(`Removed "${name}"`);
+    renderSettings();
+  } catch (err) { hideSync(); showToast('Save failed', '#ff3c5f'); }
+}
+
+async function addExercise(zIdx) {
+  const zoneName = zonesConfig[zIdx].name;
+  const name = prompt(`New exercise name for ${zoneName}:`);
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if (zonesConfig[zIdx].exercises.includes(trimmed)) {
+    showToast(`"${trimmed}" already exists in ${zoneName}`, '#ff3c5f');
+    return;
+  }
+  zonesConfig[zIdx].exercises.push(trimmed);
+  showSync('Saving...');
+  try {
+    await saveConfig();
+    hideSync();
+    showToast(`Added "${trimmed}"`);
+    renderSettings();
+  } catch (err) { hideSync(); showToast('Save failed', '#ff3c5f'); }
+}
+
+async function deleteExercise(zIdx, eIdx) {
+  const name = zonesConfig[zIdx].exercises[eIdx];
+  if (!confirm(`Remove "${name}" from ${zonesConfig[zIdx].name}?\n\nYour past history will keep these entries.`)) return;
+  zonesConfig[zIdx].exercises.splice(eIdx, 1);
   showSync('Saving...');
   try {
     await saveConfig();
@@ -1148,7 +1462,9 @@ Object.assign(window, {
   filterHistory, filterProgress,
   openProgressDetail, closeProgressDetail,
   openSettings, closeSettings,
-  addExercise, deleteExercise
+  addExercise, deleteExercise,
+  cycleZoneIcon, deleteZone,
+  showAddZoneForm, hideAddZoneForm, saveNewZone, cycleNewZoneIcon
 });
 </script>
 </body>
