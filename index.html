@@ -538,11 +538,29 @@
   .btn-cancel:active { background: var(--bg2); }
 
   .sz-body { padding: 8px 12px 12px; }
-  .sz-ex-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
-  .sz-ex-input { flex: 1; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  .sz-ex-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; flex-wrap: wrap; }
+  .sz-ex-input { flex: 1; min-width: 140px; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
     color: var(--text); padding: 10px 12px; font-size: 14px;
     font-family: inherit; outline: none; user-select: text; transition: border-color 0.2s; }
   .sz-ex-input:focus { border-color: var(--red); }
+  .sz-bw-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 999px; padding: 4px 10px;
+    cursor: pointer; transition: all 0.2s;
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .sz-bw-toggle.on {
+    background: rgba(57,217,138,0.15); color: var(--green);
+    border-color: var(--green);
+  }
+  .sz-bw-toggle .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border);
+  }
+  .sz-bw-toggle.on .dot { background: var(--green); }
   .sz-action-btn { background: var(--bg2); border: 1px solid var(--border); color: var(--muted);
     width: 36px; height: 36px; border-radius: var(--radius-sm); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -614,6 +632,28 @@
   }
   .wm-exercise.active { border-color: var(--red); }
   .wm-exercise.done   { border-color: var(--green); opacity: 0.85; }
+  .wm-last-time {
+    font-size: 11px; color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    margin: -4px 0 10px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 10px;
+    background: var(--bg2); border-radius: var(--radius-sm);
+    border-left: 2px solid var(--gold);
+  }
+  .wm-last-time.empty { border-left-color: var(--border); color: var(--muted); }
+  .wm-last-time-label {
+    font-size: 9px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+    font-weight: 600; font-family: 'DM Sans', sans-serif;
+    flex-shrink: 0;
+  }
+  .wm-last-time-value {
+    color: var(--gold); font-weight: 500;
+    flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .wm-last-time.empty .wm-last-time-value { color: var(--muted); }
   .wm-ex-header {
     display: flex; justify-content: space-between; align-items: center;
     gap: 10px; margin-bottom: 10px;
@@ -659,26 +699,36 @@
   .wm-btn-secondary { background: var(--bg2); color: var(--text); border: 1px solid var(--border); }
 
   .wm-set-input-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-    margin-bottom: 10px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 12px;
   }
-  .wm-input-wrap { position: relative; }
+  .wm-set-input-row.reps-only { grid-template-columns: 1fr; max-width: 240px; margin-left: auto; margin-right: auto; }
+  .wm-input-wrap { display: flex; flex-direction: column; gap: 6px; }
   .wm-input-label {
-    position: absolute; top: 6px; left: 12px;
-    font-size: 9px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.5px;
-    pointer-events: none;
+    font-size: 10px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1.5px;
+    font-weight: 600;
+    padding-left: 4px;
   }
   .wm-input {
     width: 100%; background: var(--input-bg);
     border: 1.5px solid var(--border); border-radius: var(--radius-sm);
     color: var(--text); font-family: 'DM Mono', monospace;
-    font-size: 17px; font-weight: 500;
-    padding: 22px 12px 8px;
+    font-size: 20px; font-weight: 600;
+    padding: 14px 12px;
     outline: none; transition: border-color 0.2s;
     user-select: text; text-align: center;
+    /* Hide number input spinners */
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .wm-input::-webkit-outer-spin-button,
+  .wm-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
   .wm-input:focus { border-color: var(--red); }
+  .wm-input::placeholder { color: var(--muted); opacity: 0.5; }
 
   .wm-finish-btn {
     width: 100%; background: var(--green); color: #0a1f14;
@@ -1202,11 +1252,33 @@
 <script>
 const DEFAULT_ICONS = { Chest: '🫁', Arms: '💪', Shoulders: '🏔️', Back: '🦅', Abs: '🔥' };
 const DEFAULT_ZONES = [
-  { name: 'Chest',     icon: '🫁',   exercises: ['Pushups', 'Pec Dec', 'Chest Pullups', 'High Angle Press'] },
-  { name: 'Arms',      icon: '💪',   exercises: ['Triceps Push Rope', 'Triceps Push Handles', 'Biceps Rope', 'Biceps Handle'] },
-  { name: 'Shoulders', icon: '🏔️',  exercises: ['Lats', 'Shoulder Press', 'Rotations', 'Dumbbell Rotations'] },
-  { name: 'Back',      icon: '🦅',   exercises: ['Pullups', 'Rows', 'Flags', 'Pulldowns'] },
-  { name: 'Abs',       icon: '🔥',   exercises: ['Abs'] }
+  { name: 'Chest',     icon: '🫁',   exercises: [
+    { name: 'Pushups', bodyweight: true },
+    { name: 'Pec Dec', bodyweight: false },
+    { name: 'Chest Pullups', bodyweight: true },
+    { name: 'High Angle Press', bodyweight: false }
+  ]},
+  { name: 'Arms',      icon: '💪',   exercises: [
+    { name: 'Triceps Push Rope', bodyweight: false },
+    { name: 'Triceps Push Handles', bodyweight: false },
+    { name: 'Biceps Rope', bodyweight: false },
+    { name: 'Biceps Handle', bodyweight: false }
+  ]},
+  { name: 'Shoulders', icon: '🏔️',  exercises: [
+    { name: 'Lats', bodyweight: false },
+    { name: 'Shoulder Press', bodyweight: false },
+    { name: 'Rotations', bodyweight: false },
+    { name: 'Dumbbell Rotations', bodyweight: false }
+  ]},
+  { name: 'Back',      icon: '🦅',   exercises: [
+    { name: 'Pullups', bodyweight: true },
+    { name: 'Rows', bodyweight: false },
+    { name: 'Flags', bodyweight: true },
+    { name: 'Pulldowns', bodyweight: false }
+  ]},
+  { name: 'Abs',       icon: '🔥',   exercises: [
+    { name: 'Abs', bodyweight: true }
+  ]}
 ];
 
 let zonesConfig    = JSON.parse(JSON.stringify(DEFAULT_ZONES));
@@ -1248,7 +1320,25 @@ applyTheme(); // run immediately so splash matches
 function findZone(name) { return zonesConfig.find(z => z.name === name); }
 function zoneNames()    { return zonesConfig.map(z => z.name); }
 function zoneIcon(name) { return findZone(name)?.icon || '🏋️'; }
-function zoneExercises(name) { return findZone(name)?.exercises || []; }
+
+// Returns array of exercise objects: [{name, bodyweight}]
+function zoneExerciseObjects(zoneName) {
+  const z = findZone(zoneName);
+  if (!z || !Array.isArray(z.exercises)) return [];
+  return z.exercises.map(ex => {
+    if (typeof ex === 'string') return { name: ex, bodyweight: false };
+    return { name: String(ex.name || ''), bodyweight: !!ex.bodyweight };
+  }).filter(e => e.name);
+}
+// Back-compat: returns plain string names
+function zoneExercises(zoneName) {
+  return zoneExerciseObjects(zoneName).map(e => e.name);
+}
+function isExerciseBodyweight(zoneName, exerciseName) {
+  const objs = zoneExerciseObjects(zoneName);
+  const found = objs.find(e => e.name === exerciseName);
+  return found ? !!found.bodyweight : false;
+}
 
 window.addEventListener('firebase-ready', () => {
   const { auth, onAuthStateChanged } = window.__fb;
@@ -1325,28 +1415,44 @@ function friendlyError(code) {
 async function doSignOut() { await window.__fb.signOut(window.__fb.auth); }
 
 // ── Config sync ──
+function normalizeExercise(ex) {
+  if (typeof ex === 'string') return { name: ex, bodyweight: false };
+  if (ex && typeof ex === 'object') {
+    return { name: String(ex.name || ''), bodyweight: !!ex.bodyweight };
+  }
+  return null;
+}
+
 function normalizeConfigData(data) {
   // New format: { version: 2, zones: [{name, icon, exercises}, ...] }
   if (data && data.version === 2 && Array.isArray(data.zones)) {
     return data.zones.map(z => ({
       name: String(z.name || ''),
       icon: String(z.icon || '🏋️'),
-      exercises: Array.isArray(z.exercises) ? z.exercises.map(String) : []
+      exercises: Array.isArray(z.exercises)
+        ? z.exercises.map(normalizeExercise).filter(e => e && e.name)
+        : []
     })).filter(z => z.name);
   }
   // Old format: top-level keys are zone names with arrays of exercises
   const zones = [];
-  // Preserve default order for known zones
   DEFAULT_ZONES.forEach(d => {
     if (data && Array.isArray(data[d.name])) {
-      zones.push({ name: d.name, icon: DEFAULT_ICONS[d.name] || '🏋️', exercises: data[d.name] });
+      zones.push({
+        name: d.name,
+        icon: DEFAULT_ICONS[d.name] || '🏋️',
+        exercises: data[d.name].map(normalizeExercise).filter(e => e && e.name)
+      });
     }
   });
-  // Append any custom zones from old format
   if (data) {
     Object.keys(data).forEach(name => {
       if (Array.isArray(data[name]) && !DEFAULT_ICONS[name]) {
-        zones.push({ name, icon: '🏋️', exercises: data[name] });
+        zones.push({
+          name,
+          icon: '🏋️',
+          exercises: data[name].map(normalizeExercise).filter(e => e && e.name)
+        });
       }
     });
   }
@@ -1757,6 +1863,7 @@ function entryVolume(e) {
   // Workout-mode entries have a sets array
   if (Array.isArray(e.sets) && e.sets.length) {
     return e.sets.reduce((sum, s) => {
+      if (s.bodyweight) return sum; // bodyweight contributes no kg
       const w = parseFloat(s.weight) || 0;
       const r = parseInt(s.reps, 10) || 0;
       return sum + (w * r);
@@ -1928,13 +2035,25 @@ function calcTopZone(history) {
 }
 
 // ── Progress page ──
-function extractWeight(str) {
+function extractWeight(str, entry) {
+  // For workout-mode entries with structured sets, use top set weight
+  if (entry && Array.isArray(entry.sets) && entry.sets.length) {
+    const weighted = entry.sets.filter(s => !s.bodyweight && s.weight > 0).map(s => s.weight);
+    if (weighted.length) return Math.max(...weighted);
+    // All bodyweight: chart reps instead (top set reps)
+    const reps = entry.sets.map(s => parseInt(s.reps, 10)).filter(r => r > 0);
+    if (reps.length) return Math.max(...reps);
+    return null;
+  }
   if (!str) return null;
   const s = String(str);
   const kg = s.match(/(\d+(?:\.\d+)?)\s*kg/i);
   if (kg) return parseFloat(kg[1]);
   const lb = s.match(/(\d+(?:\.\d+)?)\s*lb/i);
   if (lb) return parseFloat(lb[1]);
+  // Pure "X reps" format (bodyweight) — return the rep count
+  const repsOnly = s.match(/^(\d+)\s*reps?$/i);
+  if (repsOnly) return parseInt(repsOnly[1], 10);
   const nums = s.match(/\d+(?:\.\d+)?/g);
   if (!nums) return null;
   return Math.max(...nums.map(parseFloat));
@@ -1952,7 +2071,7 @@ function renderProgressList() {
   showZones.forEach(zone => {
     zoneExercises(zone).forEach(ex => {
       const entries = historyCache.filter(e => e.zone === zone && e.exercise === ex);
-      const weights = entries.map(e => extractWeight(e.value)).filter(n => n !== null);
+      const weights = entries.map(e => extractWeight(e.value, e)).filter(n => n !== null);
       let trend = 'flat', label = '—';
       if (weights.length >= 2) {
         const first = weights[0], last = weights[weights.length - 1];
@@ -1998,7 +2117,7 @@ function openProgressDetail(zone, exercise) {
   document.getElementById('chart-subtitle').textContent = zone;
 
   const entries = historyCache.filter(e => e.zone === zone && e.exercise === exercise);
-  const points = entries.map(e => ({ ...e, weight: extractWeight(e.value) })).filter(e => e.weight !== null);
+  const points = entries.map(e => ({ ...e, weight: extractWeight(e.value, e) })).filter(e => e.weight !== null);
 
   const weights = points.map(p => p.weight);
   const minW  = weights.length ? Math.min(...weights) : 0;
@@ -2278,6 +2397,29 @@ function startWorkout(zoneName) {
   renderWorkoutBody();
 }
 
+// Find the most recent previous workout entry for an exercise (excluding today)
+// Returns formatted string like "80kg × 10, 85kg × 8, 90kg × 6" or null.
+function getLastSession(zone, exercise) {
+  const today = new Date().toLocaleDateString('en-GB');
+  for (let i = historyCache.length - 1; i >= 0; i--) {
+    const e = historyCache[i];
+    if (e.zone !== zone || e.exercise !== exercise) continue;
+    if (e.date === today) continue;
+    if (Array.isArray(e.sets) && e.sets.length) {
+      return {
+        date: e.date,
+        text: e.sets.map(s => s.bodyweight
+          ? `${s.reps} reps`
+          : `${formatNum(s.weight)}kg×${s.reps}`).join(', ')
+      };
+    }
+    if (e.value) {
+      return { date: e.date, text: String(e.value) };
+    }
+  }
+  return null;
+}
+
 function startElapsedTimer() {
   if (elapsedTimer) clearInterval(elapsedTimer);
   const update = () => {
@@ -2306,26 +2448,71 @@ function renderWorkoutBody() {
 
     let setsHtml = '';
     if (ex.sets.length) {
-      setsHtml = '<div class="wm-sets-list">' + ex.sets.map((s, i) =>
-        `<div class="wm-set-pill"><span class="set-num">#${i+1}</span><span class="set-val">${s.weight}kg × ${s.reps}</span></div>`
-      ).join('') + '</div>';
+      setsHtml = '<div class="wm-sets-list">' + ex.sets.map((s, i) => {
+        const valText = (s.weight === null || s.weight === undefined || s.weight === 0 && s.bodyweight)
+          ? `${s.reps} reps`
+          : `${s.weight}kg × ${s.reps}`;
+        // Better: check bodyweight flag on the set
+        const display = s.bodyweight ? `${s.reps} reps` : `${s.weight}kg × ${s.reps}`;
+        return `<div class="wm-set-pill"><span class="set-num">#${i+1}</span><span class="set-val">${display}</span></div>`;
+      }).join('') + '</div>';
     }
+
+    // Previous session — what to beat
+    const last = getLastSession(workoutSession.zone, ex.name);
+    const lastTimeHtml = last
+      ? `<div class="wm-last-time">
+           <span class="wm-last-time-label">Last:</span>
+           <span class="wm-last-time-value">${escapeHtml(last.text)}</span>
+         </div>`
+      : `<div class="wm-last-time empty">
+           <span class="wm-last-time-label">Last:</span>
+           <span class="wm-last-time-value">No record yet — set the baseline</span>
+         </div>`;
 
     let actionHtml = '';
     if (isDone) {
       actionHtml = `<button class="wm-action-btn wm-btn-secondary" onclick="reopenExercise(${idx})">Add another set</button>`;
     } else if (isActive) {
+      // Pre-fill: most recent set in current session, else first set of last session
+      let prefW = '', prefR = '';
+      if (ex.sets.length > 0) {
+        const lastSet = ex.sets[ex.sets.length - 1];
+        prefW = lastSet.weight;
+        prefR = lastSet.reps;
+      } else if (last && Array.isArray(historyCache.find(e =>
+        e.zone === workoutSession.zone && e.exercise === ex.name && e.date === last.date
+      )?.sets)) {
+        const prevEntry = historyCache.find(e =>
+          e.zone === workoutSession.zone && e.exercise === ex.name && e.date === last.date
+        );
+        if (prevEntry && prevEntry.sets && prevEntry.sets[0]) {
+          prefW = prevEntry.sets[0].weight;
+          prefR = prevEntry.sets[0].reps;
+        }
+      }
+
+      const isBW = isExerciseBodyweight(workoutSession.zone, ex.name);
+      const inputs = isBW
+        ? `<div class="wm-set-input-row reps-only">
+             <div class="wm-input-wrap">
+               <div class="wm-input-label">Reps</div>
+               <input class="wm-input" type="number" inputmode="numeric" id="wm-reps" placeholder="0" value="${prefR}">
+             </div>
+           </div>`
+        : `<div class="wm-set-input-row">
+             <div class="wm-input-wrap">
+               <div class="wm-input-label">Weight (kg)</div>
+               <input class="wm-input" type="number" inputmode="decimal" id="wm-weight" placeholder="0" value="${prefW}">
+             </div>
+             <div class="wm-input-wrap">
+               <div class="wm-input-label">Reps</div>
+               <input class="wm-input" type="number" inputmode="numeric" id="wm-reps" placeholder="0" value="${prefR}">
+             </div>
+           </div>`;
+
       actionHtml = `
-        <div class="wm-set-input-row">
-          <div class="wm-input-wrap">
-            <div class="wm-input-label">Weight (kg)</div>
-            <input class="wm-input" type="number" inputmode="decimal" id="wm-weight" placeholder="0">
-          </div>
-          <div class="wm-input-wrap">
-            <div class="wm-input-label">Reps</div>
-            <input class="wm-input" type="number" inputmode="numeric" id="wm-reps" placeholder="0">
-          </div>
-        </div>
+        ${inputs}
         <button class="wm-action-btn wm-btn-start" onclick="logSet()">Log Set & Rest</button>
         ${ex.sets.length ? `<button class="wm-action-btn wm-btn-finish" style="margin-top:8px" onclick="finishExercise()">Finish exercise (${ex.sets.length} set${ex.sets.length===1?'':'s'})</button>` : ''}
       `;
@@ -2339,6 +2526,7 @@ function renderWorkoutBody() {
           <div class="wm-ex-name">${escapeHtml(ex.name)}</div>
           <div class="wm-ex-status ${statusClass}">${statusLabel}</div>
         </div>
+        ${lastTimeHtml}
         ${setsHtml}
         ${actionHtml}
       </div>
@@ -2395,14 +2583,20 @@ function finishExercise() {
 
 function logSet() {
   if (!workoutSession || workoutSession.activeIdx < 0) return;
-  const wEl = document.getElementById('wm-weight');
+  const ex = workoutSession.exercises[workoutSession.activeIdx];
+  const isBW = isExerciseBodyweight(workoutSession.zone, ex.name);
   const rEl = document.getElementById('wm-reps');
-  const w = parseFloat(wEl.value);
   const r = parseInt(rEl.value, 10);
-  if (isNaN(w) || w < 0) { showToast('Enter weight', '#ff3c5f'); wEl.focus(); return; }
   if (isNaN(r) || r <= 0) { showToast('Enter reps', '#ff3c5f'); rEl.focus(); return; }
 
-  workoutSession.exercises[workoutSession.activeIdx].sets.push({ weight: w, reps: r });
+  let w = 0;
+  if (!isBW) {
+    const wEl = document.getElementById('wm-weight');
+    w = parseFloat(wEl.value);
+    if (isNaN(w) || w < 0) { showToast('Enter weight', '#ff3c5f'); wEl.focus(); return; }
+  }
+
+  ex.sets.push(isBW ? { reps: r, bodyweight: true } : { weight: w, reps: r });
   renderWorkoutBody();
   startRest();
 }
@@ -2462,8 +2656,10 @@ async function finishWorkout() {
   showSync('Saving...');
   const writes = [];
   exsWithSets.forEach(ex => {
-    // Build summary string for legacy compatibility: "80kg 3×10, 85kg 3×8" etc.
-    const summary = ex.sets.map(s => `${s.weight}kg×${s.reps}`).join(', ');
+    // Build summary string for legacy compatibility
+    const summary = ex.sets.map(s => s.bodyweight
+      ? `${s.reps} reps`
+      : `${s.weight}kg×${s.reps}`).join(', ');
     writes.push(addEntryWithSets(today, workoutSession.zone, ex.name, summary, ex.sets));
   });
 
@@ -2571,12 +2767,17 @@ function renderSettings() {
     body.appendChild(zd);
 
     const sub = document.getElementById(`sz-body-${zIdx}`);
-    zone.exercises.forEach((ex, eIdx) => {
+    zone.exercises.forEach((rawEx, eIdx) => {
+      const ex = normalizeExercise(rawEx);
       const row = document.createElement('div');
       row.className = 'sz-ex-row';
       row.innerHTML = `
-        <input class="sz-ex-input" type="text" value="${escapeHtml(ex)}"
-               data-zidx="${zIdx}" data-eidx="${eIdx}" data-original="${escapeHtml(ex)}">
+        <input class="sz-ex-input" type="text" value="${escapeHtml(ex.name)}"
+               data-zidx="${zIdx}" data-eidx="${eIdx}" data-original="${escapeHtml(ex.name)}">
+        <button class="sz-bw-toggle ${ex.bodyweight ? 'on' : ''}" onclick="toggleBodyweight(${zIdx}, ${eIdx})" title="Bodyweight exercise (no weight tracked)">
+          <span class="dot"></span>
+          <span>BW</span>
+        </button>
         <button class="sz-action-btn delete" onclick="deleteExercise(${zIdx}, ${eIdx})">🗑</button>
       `;
       sub.appendChild(row);
@@ -2654,7 +2855,9 @@ function renderSettings() {
       if (!newName) { e.target.value = orig; return; }
       if (newName === orig) return;
       const zoneName = zonesConfig[zIdx].name;
-      zonesConfig[zIdx].exercises[eIdx] = newName;
+      // Preserve bodyweight flag during rename
+      const current = normalizeExercise(zonesConfig[zIdx].exercises[eIdx]);
+      zonesConfig[zIdx].exercises[eIdx] = { name: newName, bodyweight: current.bodyweight };
       e.target.dataset.original = newName;
       showSync('Saving...');
       try {
@@ -2668,6 +2871,18 @@ function renderSettings() {
       }
     });
   });
+}
+
+async function toggleBodyweight(zIdx, eIdx) {
+  const current = normalizeExercise(zonesConfig[zIdx].exercises[eIdx]);
+  zonesConfig[zIdx].exercises[eIdx] = { name: current.name, bodyweight: !current.bodyweight };
+  showSync('Saving...');
+  try {
+    await saveConfig();
+    hideSync();
+    showToast(current.bodyweight ? `${current.name}: weight tracked` : `${current.name}: bodyweight only`);
+    renderSettings();
+  } catch (err) { hideSync(); showToast('Save failed', '#ff3c5f'); }
 }
 
 async function cycleZoneIcon(zIdx) {
@@ -2744,11 +2959,12 @@ async function addExercise(zIdx) {
   const name = prompt(`New exercise name for ${zoneName}:`);
   if (!name || !name.trim()) return;
   const trimmed = name.trim();
-  if (zonesConfig[zIdx].exercises.includes(trimmed)) {
+  const existing = zoneExerciseObjects(zoneName).map(e => e.name);
+  if (existing.includes(trimmed)) {
     showToast(`"${trimmed}" already exists in ${zoneName}`, '#ff3c5f');
     return;
   }
-  zonesConfig[zIdx].exercises.push(trimmed);
+  zonesConfig[zIdx].exercises.push({ name: trimmed, bodyweight: false });
   showSync('Saving...');
   try {
     await saveConfig();
@@ -2759,14 +2975,14 @@ async function addExercise(zIdx) {
 }
 
 async function deleteExercise(zIdx, eIdx) {
-  const name = zonesConfig[zIdx].exercises[eIdx];
-  if (!confirm(`Remove "${name}" from ${zonesConfig[zIdx].name}?\n\nYour past history will keep these entries.`)) return;
+  const ex = normalizeExercise(zonesConfig[zIdx].exercises[eIdx]);
+  if (!confirm(`Remove "${ex.name}" from ${zonesConfig[zIdx].name}?\n\nYour past history will keep these entries.`)) return;
   zonesConfig[zIdx].exercises.splice(eIdx, 1);
   showSync('Saving...');
   try {
     await saveConfig();
     hideSync();
-    showToast(`Removed "${name}"`);
+    showToast(`Removed "${ex.name}"`);
     renderSettings();
   } catch (err) { hideSync(); showToast('Save failed', '#ff3c5f'); }
 }
@@ -2805,6 +3021,7 @@ Object.assign(window, {
   openProgressDetail, closeProgressDetail,
   openSettings, closeSettings,
   addExercise, deleteExercise,
+  toggleBodyweight,
   cycleZoneIcon, deleteZone,
   showAddZoneForm, hideAddZoneForm, saveNewZone, cycleNewZoneIcon,
   // Volume chart
